@@ -1,6 +1,6 @@
 # Hearby 🎵
 
-**Hearby** is a mobile social iOS app that connects to your Spotify data and lets you share what you're currently listening to with nearby music listeners. Discover what people around you are jamming to in real-time on an interactive OpenStreetMap-style view!
+**Hearby** is a mobile-first web application that connects to your Spotify data and lets you share what you're currently listening to with nearby music listeners. Discover what people around you are jamming to in real-time on an interactive OpenStreetMap-style view!
 
 ## Features
 
@@ -10,40 +10,60 @@
 - 🗺️ **OpenStreetMap Style View**: Beautiful map interface showing your current location and city
 - 🎵 **Real-Time Music Sharing**: Display current playing tracks from Spotify
 - 👥 **Nearby Listeners**: Discover what music fans around you are listening to
+- 📱 **Mobile-First Design**: Optimized for mobile devices with responsive, touch-friendly UI
 - 🔒 **Privacy-Focused**: Location permissions and data handling built with privacy in mind
 
 ## Architecture
 
-The app is built using native iOS technologies:
+The app is built as a modern web application using React:
 
 ### Key Components
 
-1. **SpotifyManager**: Handles Spotify OAuth authentication and playback data
-2. **LocationManager**: Manages location services and permissions
-3. **MapViewController**: Main view with map and nearby listeners
+1. **SpotifyManager**: Handles Spotify OAuth authentication (PKCE) and playback data
+2. **LocationManager**: Manages browser geolocation services and permissions
+3. **MapView**: Main view with Leaflet map and nearby listeners
 4. **Models**: Data structures for User, Track, Location, and NearbyListener
+
+### Technology Stack
+
+- **Frontend**: React 18.x with modern JavaScript/ES6+
+- **Map**: Leaflet.js with OpenStreetMap tiles
+- **Styling**: CSS3 with mobile-first responsive design
+- **Location**: Browser Geolocation API
+- **Authentication**: OAuth 2.0 with PKCE for Spotify
 
 ### File Structure
 
 ```
-Hearby/
-├── Hearby/
-│   ├── AppDelegate.swift              # App lifecycle management
-│   ├── SceneDelegate.swift            # Scene management and navigation
-│   ├── Models.swift                   # Data models
-│   ├── SpotifyManager.swift           # Spotify integration
-│   ├── LocationManager.swift          # Location services
-│   ├── SpotifyAuthViewController.swift # Spotify authentication UI
-│   ├── MapViewController.swift         # Main map view
-│   ├── UIComponents.swift             # Reusable UI components
-│   └── Info.plist                     # App configuration
-└── Hearby.xcodeproj/                  # Xcode project
+hearby/
+├── web-app/                        # React Web Application
+│   ├── public/
+│   │   ├── index.html             # HTML template with mobile meta tags
+│   │   └── manifest.json          # PWA manifest
+│   ├── src/
+│   │   ├── components/            # React components
+│   │   │   ├── SpotifyAuth.js     # Spotify authentication UI
+│   │   │   ├── MapView.js         # Main map view
+│   │   │   ├── CurrentTrack.js    # Current track widget
+│   │   │   └── ListenerPopup.js   # Listener detail popup
+│   │   ├── services/              # Business logic
+│   │   │   ├── SpotifyManager.js  # Spotify integration
+│   │   │   └── LocationManager.js # Location services
+│   │   ├── models/                # Data models
+│   │   │   └── index.js           # User, Track, Location models
+│   │   ├── App.js                 # Main app component
+│   │   └── App.css                # Global styles
+│   ├── package.json               # Dependencies
+│   └── README.md                  # Detailed web app documentation
+├── Hearby/                        # Legacy iOS App (Swift/UIKit)
+└── Documentation/
 ```
 
 ## Prerequisites
 
-- iOS 14.0 or later
-- Xcode 12.0 or later
+- Node.js 14.0 or later
+- npm or yarn
+- Modern web browser (Chrome, Safari, Firefox, Edge)
 - Spotify Developer Account (for API credentials)
 
 ## Setup Instructions
@@ -52,47 +72,58 @@ Hearby/
 
 ```bash
 git clone https://github.com/jthibault03/hearby.git
-cd hearby
+cd hearby/web-app
 ```
 
-### 2. Configure Spotify Credentials
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure Spotify Credentials
 
 1. Create a Spotify Developer account at [developer.spotify.com](https://developer.spotify.com)
 2. Create a new app in your Spotify Developer Dashboard
-3. Add `hearby://spotify-callback` to your Redirect URIs
-4. Update `SpotifyManager.swift` with your credentials:
+3. Add `http://localhost:3000/callback` to your Redirect URIs (for development)
+4. Update `src/services/SpotifyManager.js` with your credentials:
 
-```swift
-private let clientId = "YOUR_SPOTIFY_CLIENT_ID"
+```javascript
+this.clientId = 'YOUR_SPOTIFY_CLIENT_ID';
 ```
 
-### 3. Open in Xcode
+### 4. Start Development Server
 
 ```bash
-open Hearby/Hearby.xcodeproj
+npm start
 ```
 
-### 4. Build and Run
+The app will open at `http://localhost:3000`
 
-- Select a simulator or connected device
-- Press `Cmd + R` to build and run
+### 5. Build for Production
+
+```bash
+npm run build
+```
 
 ## Usage
 
 1. **First Launch**: Tap "Connect with Spotify" to authenticate
-2. **Grant Permissions**: Allow location access when prompted
+2. **Grant Permissions**: Allow location access when prompted by your browser
 3. **Explore**: View the map showing your location and nearby listeners
-4. **Discover**: Tap on map annotations to see what others are listening to
+4. **Discover**: Tap on map markers to see what others are listening to
 5. **Share**: Your currently playing track is displayed at the bottom
 
-## Configuration
+## Mobile Optimization
 
-### Info.plist Settings
+The app is designed with a mobile-first approach:
 
-The app requires the following permissions:
-- `NSLocationWhenInUseUsageDescription`: For showing your location on the map
-- `NSLocationAlwaysAndWhenInUseUsageDescription`: For continuous location updates
-- URL Scheme: `hearby://` for Spotify OAuth callback
+- **Responsive Layout**: Adapts to any screen size
+- **Touch Controls**: Optimized for touch interactions
+- **Mobile Viewport**: Proper viewport meta tags
+- **PWA Support**: Can be installed as a Progressive Web App
+- **Safe Areas**: Supports notched devices
+- **Performance**: Optimized bundle size
 
 ## Development
 
@@ -117,21 +148,31 @@ For production, you'll need to:
 - [ ] Music recommendations based on nearby listeners
 - [ ] Social features (like, comment, share)
 - [ ] Privacy controls (invisible mode, radius control)
+- [ ] Push notifications
 
 ## Technologies Used
 
-- **Swift**: Native iOS development
-- **UIKit**: UI framework
-- **MapKit**: Map display and annotations
-- **CoreLocation**: Location services
-- **Spotify Web API**: Music playback data (to be integrated)
+- **React**: Modern UI framework
+- **Leaflet.js**: Interactive maps with OpenStreetMap
+- **JavaScript/ES6+**: Modern JavaScript features
+- **CSS3**: Responsive mobile-first design
+- **Browser APIs**: Geolocation, LocalStorage
+- **Spotify Web API**: Music playback data (OAuth 2.0 + PKCE)
 
 ## Security & Privacy
 
 - Location data is only used for displaying on the map
-- Spotify authentication uses OAuth 2.0
+- Spotify authentication uses OAuth 2.0 with PKCE (no client secret)
 - No personal data is stored permanently
 - Users can disconnect at any time
+- HTTPS required for production (geolocation requirement)
+
+## Browser Support
+
+- Chrome/Edge 90+
+- Safari 14+ (including Mobile Safari)
+- Firefox 88+
+- Mobile browsers on iOS 14+ and Android 8+
 
 ## Contributing
 
