@@ -47,7 +47,7 @@ A mobile-first web application that connects to your Spotify account and lets yo
    Edit `src/services/SpotifyManager.js` and update:
    ```javascript
    this.clientId = 'YOUR_SPOTIFY_CLIENT_ID';
-   this.redirectUri = `${window.location.origin}/callback`;
+   this.redirectUri = process.env.REACT_APP_REDIRECT_URI;
    ```
 
 4. **Start the development server**
