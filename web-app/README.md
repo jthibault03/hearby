@@ -47,7 +47,7 @@ A mobile-first web application that connects to your Spotify account and lets yo
    Edit `src/services/SpotifyManager.js` and update:
    ```javascript
    this.clientId = 'YOUR_SPOTIFY_CLIENT_ID';
-   this.redirectUri = process.env.REACT_APP_REDIRECT_URI;
+   this.redirectUri = `${window.location.origin}/callback`;
    ```
 
 4. **Start the development server**
@@ -64,7 +64,7 @@ A mobile-first web application that connects to your Spotify account and lets yo
 
 1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
 2. Create a new app
-3. Add your redirect URI (e.g., `http://localhost:3000/callback` for development)
+3. Add your redirect URI (e.g., `http://127.0.0.1:3000/callback` for development)
 4. Copy your Client ID and update the app configuration
 
 ## Project Structure
