@@ -28,7 +28,7 @@ The app works with mock data out of the box. To use real Spotify:
 
 1. Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
 2. Create a new app
-3. Add redirect URI: `http://localhost:3000/callback`
+3. Add redirect URI: `http://127.0.0.1:3000/callback`
 4. Edit `src/services/SpotifyManager.js`:
    ```javascript
    this.clientId = 'YOUR_CLIENT_ID_HERE';
