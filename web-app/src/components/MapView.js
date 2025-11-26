@@ -25,21 +25,20 @@ const userIcon = new L.Icon({
       <circle cx="12" cy="12" r="4" fill="white"/>
     </svg>
   `),
-  iconSize: [32, 32],
-  iconAnchor: [16, 16],
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
 });
 
 // Custom icon for nearby listeners
 const listenerIcon = new L.Icon({
   iconUrl: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32">
-      <circle cx="12" cy="12" r="10" fill="#1DB954" stroke="white" stroke-width="2"/>
-      <text x="12" y="17" font-size="14" text-anchor="middle" fill="white">🎵</text>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+      <circle cx="12" cy="12" r="10" fill="#1DB954" stroke="white" stroke-width="1.5"/>
     </svg>
   `),
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32],
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+  popupAnchor: [0, -12],
 });
 
 // Component to recenter map
@@ -160,8 +159,8 @@ function MapView({ onLogout }) {
         ref={mapRef}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
         <RecenterMap center={mapCenter} />
         

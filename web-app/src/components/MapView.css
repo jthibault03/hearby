@@ -11,6 +11,18 @@
   z-index: 0;
 }
 
+/* Softer map container and reduced UI chrome */
+.leaflet-container {
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.leaflet-control-zoom {
+  background: rgba(255,255,255,0.9);
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(2,6,23,0.06);
+}
+
 .popup-content {
   text-align: center;
   padding: 5px;
@@ -36,7 +48,7 @@
   border-radius: 50%;
   background: white;
   border: 2px solid #4A90E2;
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
@@ -64,7 +76,7 @@
   border-radius: 50%;
   background: white;
   border: 2px solid #666;
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
@@ -147,6 +159,10 @@
 .leaflet-popup-content-wrapper {
   border-radius: 12px;
   padding: 2px;
+}
+
+.leaflet-popup-tip {
+  background: transparent;
 }
 
 .leaflet-popup-content {
