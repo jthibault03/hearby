@@ -3,9 +3,10 @@ import { Track } from '../models';
 
 class SpotifyManager {
   constructor() {
-    // Spotify API Credentials (should be configured by user)
-    this.clientId = 'YOUR_SPOTIFY_CLIENT_ID';
-    this.redirectUri = `${window.location.origin}/callback`;
+    // Spotify API Credentials (read from Create React App env vars)
+    // Use `REACT_APP_` prefix so these are available in the browser bundle
+    this.clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
+    this.redirectUri = process.env.REACT_APP_REDIRECT_URI;
     this.scopes = 'user-read-currently-playing user-read-playback-state';
     
     this.accessToken = null;
