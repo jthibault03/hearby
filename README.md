@@ -85,7 +85,7 @@ npm install
 
 1. Create a Spotify Developer account at [developer.spotify.com](https://developer.spotify.com)
 2. Create a new app in your Spotify Developer Dashboard
-3. Add `http://localhost:3000/callback` to your Redirect URIs (for development)
+3. Add `http://127.0.0.1:3000/callback'` to your Redirect URIs (for development)
 4. Update `src/services/SpotifyManager.js` with your credentials:
 
 ```javascript
