@@ -2,7 +2,7 @@
 
 ## Spotify API Credentials
 
-### Development
+### Development // this stuff is in .env
 ```
 Client ID: YOUR_SPOTIFY_CLIENT_ID
 Client Secret: YOUR_SPOTIFY_CLIENT_SECRET
