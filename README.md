@@ -7,7 +7,7 @@
 ✨ **Core Features:**
 - 🎧 **Spotify Integration**: Connect your Spotify account to share what you're listening to
 - 📍 **Location-Based Discovery**: See nearby listeners on an interactive map
-- 🗺️ **OpenStreetMap Style View**: Beautiful map interface showing your current location and city
+- 🗺️ **OpenStreetMap Style View**: Shows a map interface with your current location and city
 - 🎵 **Real-Time Music Sharing**: Display current playing tracks from Spotify
 - 👥 **Nearby Listeners**: Discover what music fans around you are listening to
 - 📱 **Mobile-First Design**: Optimized for mobile devices with responsive, touch-friendly UI
@@ -174,17 +174,9 @@ For production, you'll need to:
 - Firefox 88+
 - Mobile browsers on iOS 14+ and Android 8+
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 ## License
 
 This project is open source and available under the MIT License.
-
-## Support
-
-For issues, questions, or suggestions, please open an issue on GitHub.
 
 ---
 
