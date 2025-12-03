@@ -64,7 +64,7 @@
 
 .playing-indicator .bar {
   width: 3px;
-  background: #1DB954;
+  background: #1db954;
   border-radius: 3px;
   animation: playing 0.8s ease-in-out infinite;
 }
@@ -82,7 +82,8 @@
 }
 
 @keyframes playing {
-  0%, 100% {
+  0%,
+  100% {
     height: 8px;
   }
   50% {
@@ -95,15 +96,15 @@
   .current-track {
     padding: 12px 15px;
   }
-  
+
   .track-icon {
     font-size: 32px;
   }
-  
+
   .track-name {
     font-size: 15px;
   }
-  
+
   .track-artist {
     font-size: 13px;
   }
