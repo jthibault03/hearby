@@ -116,9 +116,9 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
         lat,
         lng,
         intensity,
-        albumArt: track.albumArt,
-        trackName: track.name,
-        artist: track.artist,
+        albumArt: track.albumArtUrl,
+        trackName: track.title,
+        artist: (track.artistNames || []).join(", "),
         listenerCount: 1,
       });
     });
@@ -178,13 +178,13 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
               <Popup className="music-popup">
                 <div className="popup-content">
                   <img
-                    src={track.albumArt}
+                    src={track.albumArtUrl}
                     alt="Album"
                     className="popup-album"
                   />
                   <div className="popup-info">
-                    <strong>{track.name}</strong>
-                    <p>{track.artist}</p>
+                    <strong>{track.title}</strong>
+                    <p>{(track.artistNames || []).join(", ")}</p>
                     <span className="listener-name-wrapper">
                       <span className="listener-name">
                         {listener.isFriend ? (

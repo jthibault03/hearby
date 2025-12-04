@@ -98,24 +98,35 @@ async function main() {
     const album = row.album || row.album_name || null;
 
     // Audio features if available
-    // const audioFeatures = {
-    //   danceability: row.danceability !== undefined ? Number(row.danceability) : null,
-    //   energy: row.energy !== undefined ? Number(row.energy) : null,
-    //   key: row.key !== undefined ? Number(row.key) : null,
-    //   loudness: row.loudness !== undefined ? Number(row.loudness) : null,
-    //   mode: row.mode !== undefined ? Number(row.mode) : null,
-    //   speechiness: row.speechiness !== undefined ? Number(row.speechiness) : null,
-    //   acousticness: row.acousticness !== undefined ? Number(row.acousticness) : null,
-    //   instrumentalness:
-    //     row.instrumentalness !== undefined ? Number(row.instrumentalness) : null,
-    //   liveness: row.liveness !== undefined ? Number(row.liveness) : null,
-    //   valence: row.valence !== undefined ? Number(row.valence) : null,
-    //   tempo: row.tempo !== undefined ? Number(row.tempo) : null,
-    //   duration_ms: row.duration_ms !== undefined ? Number(row.duration_ms) : null,
-    //   time_signature:
-    //     row.time_signature !== undefined ? Number(row.time_signature) : null,
-    //   popularity: row.popularity !== undefined ? Number(row.popularity) : null,
-    // };
+    const audioFeatures = {
+      danceability: row.danceability !== undefined ? Number(row.danceability) : null,
+      energy: row.energy !== undefined ? Number(row.energy) : null,
+      key: row.key !== undefined ? Number(row.key) : null,
+      loudness: row.loudness !== undefined ? Number(row.loudness) : null,
+      mode: row.mode !== undefined ? Number(row.mode) : null,
+      speechiness: row.speechiness !== undefined ? Number(row.speechiness) : null,
+      acousticness: row.acousticness !== undefined ? Number(row.acousticness) : null,
+      instrumentalness:
+        row.instrumentalness !== undefined ? Number(row.instrumentalness) : null,
+      liveness: row.liveness !== undefined ? Number(row.liveness) : null,
+      valence: row.valence !== undefined ? Number(row.valence) : null,
+      tempo: row.tempo !== undefined ? Number(row.tempo) : null,
+      duration_ms: row.duration_ms !== undefined ? Number(row.duration_ms) : null,
+      time_signature:
+        row.time_signature !== undefined ? Number(row.time_signature) : null,
+      popularity: row.popularity !== undefined ? Number(row.popularity) : null,
+    };
+
+        // Filter by popularity before doing any further work
+    // const popularityCutoff = 60; // adjust if you want
+    // if (
+    //   audioFeatures.popularity == null ||
+    //   //albumArtUrl == null ||
+    //   Number.isNaN(audioFeatures.popularity) ||
+    //   audioFeatures.popularity < popularityCutoff
+    // ) {
+    //   continue; // skip this row entirely
+    // }
 
     // Derive mood tags from Kaggle audio features
     const derivedMoodTags = inferMoodTags(audioFeatures);
@@ -139,6 +150,9 @@ async function main() {
         mergedMoodTags = Array.from(set);
       }
     }
+    // if (!albumArtUrl) {
+    //     continue;
+    // }
 
     // If Kaggle provides year explicitly, prefer that when existing.year is null
     if (year == null && row.year !== undefined) {

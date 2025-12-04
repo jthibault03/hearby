@@ -69,10 +69,10 @@ const ListenersPanel = ({ listeners, onTrackSelect }) => {
 
     return (
       <div key={listener.id} className="listener-card">
-        <img src={track.albumArt} alt={track.name} className="card-album-art" />
+        <img src={track.albumArtUrl} alt={track.title} className="card-album-art" />
         <div className="card-info">
-          <div className="card-track">{track.name}</div>
-          <div className="card-artist">{track.artist}</div>
+          <div className="card-track">{track.title}</div>
+          <div className="card-artist">{(track.artistNames || []).join(", ")}</div>
           <div className="card-meta">
             <span className="card-user">
               {listener.isFriend ? listener.displayName : "Nearby User"}

@@ -24,7 +24,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "fetch:songs": "node ./scripts/fetchSpotifySongs.mjs",
-    "generate:songs": "node ./scripts/generateFromKaggle.mjs"
+    "generate:songs": "node ./scripts/generateFromKaggle.mjs",
+    "enrich:songs": "node ./scripts/enrichFromSpotify.mjs"
   },
   "eslintConfig": {
     "extends": [

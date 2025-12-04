@@ -81,11 +81,11 @@ const CollabBoothScreen = ({ onBack }) => {
                 </button>
               </div>
               <div className="room-track">
-                <img src={room.currentTrack.albumArt} alt="Album" />
+                <img src={room.currentTrack.albumArtUrl} alt="Album" />
                 <div className="track-details">
-                  <span className="track-name">{room.currentTrack.name}</span>
+                  <span className="track-name">{room.currentTrack.title}</span>
                   <span className="artist-name">
-                    {room.currentTrack.artist}
+                    {(room.currentTrack.artistNames || []).join(", ")}
                   </span>
                 </div>
               </div>

@@ -24,8 +24,8 @@ function CurrentTrack({ track, isPlaying, onPlayPause, onShowSameSong }) {
     <div className="current-track">
       <div className="track-info">
         <img
-          src={track.albumArt}
-          alt={track.name}
+          src={track.albumArtUrl}
+          alt={track.title}
           className="track-album-art"
         />
         <div className="track-details">

@@ -247,7 +247,7 @@ function normalizeTrack(spotifyTrack, features, idx, artistGenresMap) {
     country: null,
     language: null,
     moodTags: inferMoodTags(features),
-    //audioFeatures: features ?? null,
+    audioFeatures: features ?? null,
     userTags: [],
     lyricsSnippet: null,
     embedding: null,

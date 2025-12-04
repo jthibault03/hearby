@@ -39,13 +39,13 @@ function SameSongListeners({ listeners, currentTrack, onClose }) {
 
           <div className="same-song-track-info">
             <img
-              src={currentTrack.albumArt}
-              alt={currentTrack.name}
+              src={currentTrack.albumArtUrl}
+              alt={currentTrack.title}
               className="track-thumbnail"
             />
             <div>
-              <div className="track-name-modal">{currentTrack.name}</div>
-              <div className="track-artist-modal">{currentTrack.artist}</div>
+              <div className="track-name-modal">{currentTrack.title}</div>
+              <div className="track-artist-modal">{(currentTrack.artistNames || []).join(", ")}</div>
             </div>
           </div>
 
