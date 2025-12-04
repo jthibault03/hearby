@@ -7,6 +7,7 @@ import "./MapView.css";
 import locationManager from "../services/LocationManager";
 import spotifyManager from "../services/SpotifyManager";
 import { MOCK_LISTENERS, MOCK_FRIENDS, MOCK_USER } from "../services/mockData";
+import { getSongById } from "../services/mockSongData";
 import CurrentTrack from "./CurrentTrack";
 import ListenersPanel from "./ListenersPanel";
 import HeatmapLayer from "./HeatmapLayer";
@@ -98,35 +99,32 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
   );
 
   const heatmapPoints = useMemo(() => {
+    if (!MOCK_LISTENERS || MOCK_LISTENERS.length === 0) return [];
+
     const points = [];
-    const random = (max) => (Math.random() - 0.5) * max;
+    const jitter = (max) => (Math.random() - 0.5) * max;
 
-    const addCluster = (centerLat, centerLng, count, baseIntensity, spread) => {
-      for (let i = 0; i < count; i++) {
-        points.push({
-          lat: centerLat + random(spread),
-          lng: centerLng + random(spread),
-          intensity: baseIntensity * (0.7 + Math.random() * 0.3),
-        });
-      }
-    };
+    MOCK_LISTENERS.forEach((listener) => {
+      const baseLat = listener.location.latitude;
+      const baseLng = listener.location.longitude;
+      const lat = baseLat + jitter(0.0025);
+      const lng = baseLng + jitter(0.0025);
+      const intensity = 0.5 + Math.random() * 0.5;
+      const track = getSongById(listener.trackId) || {};
 
-    const [fallbackLat, fallbackLng] = DEFAULT_CENTER;
-    const lat = userLocation ? userLocation.latitude : fallbackLat;
-    const lng = userLocation ? userLocation.longitude : fallbackLng;
-
-    addCluster(lat, lng, 30, 0.9, 0.0015);
-    addCluster(lat, lng, 25, 0.6, 0.003);
-
-    FEATURED_CITY_CLUSTERS.forEach(
-      ({ lat: cityLat, lng: cityLng, baseIntensity }) => {
-        addCluster(cityLat, cityLng, 40, baseIntensity, 0.03);
-        addCluster(cityLat, cityLng, 30, baseIntensity * 0.7, 0.06);
-      }
-    );
+      points.push({
+        lat,
+        lng,
+        intensity,
+        albumArt: track.albumArt,
+        trackName: track.name,
+        artist: track.artist,
+        listenerCount: 1,
+      });
+    });
 
     return points;
-  }, [userLocation]);
+  }, []);
 
   return (
     <div className="map-view">
@@ -169,22 +167,24 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
                 listener.location.longitude
               );
 
+          const track = getSongById(listener.trackId) || {};
+
           return (
             <Marker
               key={listener.id}
               position={position}
-              icon={createAlbumIcon(listener.track.albumArt, listener.isFriend)}
+              icon={createAlbumIcon(track.albumArt, listener.isFriend)}
             >
               <Popup className="music-popup">
                 <div className="popup-content">
                   <img
-                    src={listener.track.albumArt}
+                    src={track.albumArt}
                     alt="Album"
                     className="popup-album"
                   />
                   <div className="popup-info">
-                    <strong>{listener.track.name}</strong>
-                    <p>{listener.track.artist}</p>
+                    <strong>{track.name}</strong>
+                    <p>{track.artist}</p>
                     <span className="listener-name-wrapper">
                       <span className="listener-name">
                         {listener.isFriend ? (
