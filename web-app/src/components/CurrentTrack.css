@@ -3,11 +3,10 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: white;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  padding: 15px 20px;
+  background: #0a0a0a;
+  border-top: 2px solid #1db954;
+  z-index: 2001;
+  padding: 12px 16px;
   animation: slideUp 0.3s ease-out;
 }
 
@@ -23,12 +22,15 @@
 .track-info {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
 }
 
-.track-icon {
-  font-size: 40px;
+.track-album-art {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
   flex-shrink: 0;
+  object-fit: cover;
 }
 
 .track-details {
@@ -37,9 +39,9 @@
 }
 
 .track-name {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
-  color: #333;
+  color: #ffffff;
   margin-bottom: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -47,8 +49,8 @@
 }
 
 .track-artist {
-  font-size: 14px;
-  color: #666;
+  font-size: 13px;
+  color: #b3b3b3;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -94,25 +96,26 @@
 /* Mobile optimizations */
 @media (max-width: 480px) {
   .current-track {
-    padding: 12px 15px;
+    padding: 10px 14px;
   }
 
-  .track-icon {
-    font-size: 32px;
+  .track-album-art {
+    width: 48px;
+    height: 48px;
   }
 
   .track-name {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .track-artist {
-    font-size: 13px;
+    font-size: 12px;
   }
 }
 
 /* Safe area for devices with notches */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .current-track {
-    padding-bottom: calc(15px + env(safe-area-inset-bottom));
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
   }
 }

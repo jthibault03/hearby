@@ -10,6 +10,8 @@ import { MOCK_LISTENERS, MOCK_FRIENDS, MOCK_USER } from "../services/mockData";
 import CurrentTrack from "./CurrentTrack";
 import ListenersPanel from "./ListenersPanel";
 import HeatmapLayer from "./HeatmapLayer";
+import AIFilterPanel from "./AIFilterPanel";
+import SameSongListeners from "./SameSongListeners";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -60,6 +62,9 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
   const [showFriends, setShowFriends] = useState(false);
   const [friendSearch, setFriendSearch] = useState("");
   const [map, setMap] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [showAIFilter, setShowAIFilter] = useState(false);
+  const [showSameSong, setShowSameSong] = useState(false);
 
   useEffect(() => {
     locationManager
@@ -76,6 +81,15 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
       setCurrentTrack(track);
     });
   }, []);
+
+  const handleTrackSelect = (track) => {
+    setCurrentTrack(track);
+    setIsPlaying(true);
+  };
+
+  const handlePlayPause = () => {
+    setIsPlaying(!isPlaying);
+  };
 
   const filteredFriends = MOCK_FRIENDS.filter(
     (f) =>
@@ -171,14 +185,18 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
                   <div className="popup-info">
                     <strong>{listener.track.name}</strong>
                     <p>{listener.track.artist}</p>
-                    <span className="listener-name">
-                      {listener.isFriend
-                        ? listener.displayName
-                        : "Nearby Listener"}
+                    <span className="listener-name-wrapper">
+                      <span className="listener-name">
+                        {listener.isFriend ? (
+                          <>
+                            {listener.displayName}
+                            <span className="friend-tag">Friend</span>
+                          </>
+                        ) : (
+                          "Nearby Listener"
+                        )}
+                      </span>
                     </span>
-                    {listener.isFriend && (
-                      <span className="friend-badge">Friend</span>
-                    )}
                   </div>
                 </div>
               </Popup>
@@ -190,6 +208,12 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
       <div className="top-bar">
         <h1 className="app-title">Hearby</h1>
         <div className="top-actions">
+          <button
+            className="collab-btn"
+            onClick={() => setShowAIFilter(true)}
+          >
+            🤖 AI Filter
+          </button>
           <div className="friends-dropdown-container">
             <button
               className="collab-btn"
@@ -247,13 +271,13 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
         </div>
       </div>
 
-      <ListenersPanel listeners={MOCK_LISTENERS} />
+      <ListenersPanel listeners={MOCK_LISTENERS} onTrackSelect={handleTrackSelect} />
 
       <button
         className="recenter-btn"
         style={{
           position: "absolute",
-          bottom: "75px",
+          bottom: "150px",
           right: "15px",
           zIndex: 1000,
         }}
@@ -268,7 +292,30 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
         📍
       </button>
 
-      {currentTrack && <CurrentTrack track={currentTrack} />}
+      {currentTrack && (
+        <CurrentTrack
+          track={currentTrack}
+          isPlaying={isPlaying}
+          onPlayPause={handlePlayPause}
+          onShowSameSong={() => setShowSameSong(true)}
+        />
+      )}
+
+      {showAIFilter && (
+        <AIFilterPanel
+          listeners={MOCK_LISTENERS}
+          onClose={() => setShowAIFilter(false)}
+          onTrackSelect={handleTrackSelect}
+        />
+      )}
+
+      {showSameSong && (
+        <SameSongListeners
+          listeners={MOCK_LISTENERS}
+          currentTrack={currentTrack}
+          onClose={() => setShowSameSong(false)}
+        />
+      )}
     </div>
   );
 }

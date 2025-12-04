@@ -13,8 +13,8 @@ const SpotifyAuth = () => {
       <button
         style={styles.button}
         onClick={handleDemoLogin}
-        onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-        onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+        onMouseOver={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+        onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
       >
         Connect with Spotify (Demo Mode)
       </button>
