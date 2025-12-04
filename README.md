@@ -1,10 +1,11 @@
-# Hearby 🎵
+# Hearby
 
 **Hearby** is a mobile-first web application that connects to your Spotify data and lets you share what you're currently listening to with nearby music listeners. Discover what people around you are jamming to in real-time on an interactive OpenStreetMap-style view!
 
 ## Features
 
 ✨ **Core Features:**
+
 - 🎧 **Spotify Integration**: Connect your Spotify account to share what you're listening to
 - 📍 **Location-Based Discovery**: See nearby listeners on an interactive map
 - 🗺️ **OpenStreetMap Style View**: Shows a map interface with your current location and city
@@ -89,7 +90,7 @@ npm install
 4. Update `src/services/SpotifyManager.js` with your credentials:
 
 ```javascript
-this.clientId = 'YOUR_SPOTIFY_CLIENT_ID';
+this.clientId = "YOUR_SPOTIFY_CLIENT_ID";
 ```
 
 ### 4. Start Development Server
@@ -130,11 +131,13 @@ The app is designed with a mobile-first approach:
 ### Mock Data
 
 The current implementation includes mock data for demonstration:
+
 - Mock Spotify authentication flow
 - Sample nearby listeners
 - Example tracks
 
 For production, you'll need to:
+
 1. Implement actual Spotify API calls
 2. Set up a backend service for user discovery
 3. Implement real-time data synchronization
