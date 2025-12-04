@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./SameSongListeners.css";
+import { getSongById } from "../services/mockSongData";
 import MessageModal from "./MessageModal";
 
 function SameSongListeners({ listeners, currentTrack, onClose }) {
@@ -7,11 +8,12 @@ function SameSongListeners({ listeners, currentTrack, onClose }) {
 
   if (!currentTrack) return null;
 
-  const sameSongListeners = listeners.filter(
-    (listener) =>
-      listener.track.name === currentTrack.name &&
-      listener.track.artist === currentTrack.artist
-  );
+  const sameSongListeners = listeners.filter((listener) => {
+    const track = getSongById(listener.trackId);
+    return (
+      track && track.name === currentTrack.name && track.artist === currentTrack.artist
+    );
+  });
 
   const handleUserClick = (listener) => {
     setSelectedUser(listener);

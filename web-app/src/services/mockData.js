@@ -1,5 +1,3 @@
-import { ALBUM_ARTS } from './mockImages';
-
 export const MOCK_USER = {
   id: "current-user",
   displayName: "You",
@@ -19,14 +17,7 @@ export const MOCK_LISTENERS = [
       longitude: -122.273,
       city: "Berkeley",
     },
-    track: {
-      name: "Espresso",
-      artist: "Sabrina Carpenter",
-      albumArt:
-        ALBUM_ARTS.espresso,
-      genre: "Pop",
-      sentiment_analysis: 0.85,
-    },
+    trackId: "song1",
   },
   {
     id: 2,
@@ -39,15 +30,7 @@ export const MOCK_LISTENERS = [
       longitude: -122.274,
       city: "Berkeley",
     },
-    track: {
-      name: "Not Like Us",
-      artist: "Kendrick Lamar",
-      audioUrl: "/assets/notlikeus.mp3",
-      albumArt:
-        ALBUM_ARTS.notLikeUs,
-      genre: "Hip Hop",
-      sentiment_analysis: 0.6,
-    },
+    trackId: "song2",
   },
   {
     id: 3,
@@ -60,15 +43,7 @@ export const MOCK_LISTENERS = [
       longitude: -122.258,
       city: "Berkeley",
     },
-    track: {
-      name: "BIRDS OF A FEATHER",
-      artist: "Billie Eilish",
-      audioUrl: "/assets/birdsofafeather.mp3",
-      albumArt:
-        ALBUM_ARTS.birdsOfAFeather,
-      genre: "Pop",
-      sentiment_analysis: 0.4,
-    },
+    trackId: "song3",
   },
   {
     id: 4,
@@ -81,14 +56,7 @@ export const MOCK_LISTENERS = [
       longitude: -122.259,
       city: "Berkeley",
     },
-    track: {
-      name: "Good Luck, Babe!",
-      artist: "Chappell Roan",
-      albumArt:
-        ALBUM_ARTS.goodLuckBabe,
-      genre: "Pop",
-      sentiment_analysis: 0.7,
-    },
+    trackId: "song4",
   },
   {
     id: 5,
@@ -101,14 +69,7 @@ export const MOCK_LISTENERS = [
       longitude: -122.27,
       city: "Berkeley",
     },
-    track: {
-      name: "A Bar Song (Tipsy)",
-      artist: "Shaboozey",
-      albumArt:
-        ALBUM_ARTS.aBarSongTipsy,
-      genre: "Country",
-      sentiment_analysis: 0.8,
-    },
+    trackId: "song5",
   },
   {
     id: 6,
@@ -121,15 +82,7 @@ export const MOCK_LISTENERS = [
       longitude: -122.26,
       city: "Berkeley",
     },
-    track: {
-      name: "Million Dollar Baby",
-      artist: "Tommy Richman",
-      audioUrl: "/assets/milliondollarbaby.mp3",
-      albumArt:
-        ALBUM_ARTS.millionDollarBaby,
-      genre: "Hip Hop",
-      sentiment_analysis: 0.75,
-    },
+    trackId: "song6",
   },
   {
     id: 7,
@@ -142,14 +95,7 @@ export const MOCK_LISTENERS = [
       longitude: -122.269,
       city: "Berkeley",
     },
-    track: {
-      name: "I Had Some Help",
-      artist: "Post Malone",
-      albumArt:
-        ALBUM_ARTS.iHadSomeHelp,
-      genre: "Pop",
-      sentiment_analysis: 0.65,
-    },
+    trackId: "song7",
   },
   {
     id: 8,
@@ -162,14 +108,7 @@ export const MOCK_LISTENERS = [
       longitude: -122.275,
       city: "Berkeley",
     },
-    track: {
-      name: "Too Sweet",
-      artist: "Hozier",
-      albumArt:
-        ALBUM_ARTS.tooSweet,
-      genre: "Indie",
-      sentiment_analysis: 0.55,
-    },
+    trackId: "song8",
   },
   {
     id: 9,
@@ -182,14 +121,7 @@ export const MOCK_LISTENERS = [
       longitude: -122.262,
       city: "Berkeley",
     },
-    track: {
-      name: "Beautiful Things",
-      artist: "Benson Boone",
-      albumArt:
-        ALBUM_ARTS.beautifulThings,
-      genre: "Pop",
-      sentiment_analysis: 0.5,
-    },
+    trackId: "song9",
   },
   {
     id: 10,
@@ -202,14 +134,7 @@ export const MOCK_LISTENERS = [
       longitude: -122.258,
       city: "Berkeley",
     },
-    track: {
-      name: "Lunch",
-      artist: "Billie Eilish",
-      albumArt:
-        ALBUM_ARTS.lunch,
-      genre: "Pop",
-      sentiment_analysis: 0.45,
-    },
+    trackId: "song10",
   },
   {
     id: 11,
@@ -222,14 +147,7 @@ export const MOCK_LISTENERS = [
       longitude: -122.271,
       city: "Berkeley",
     },
-    track: {
-      name: "Fortnight",
-      artist: "Taylor Swift",
-      albumArt:
-        ALBUM_ARTS.fortnight,
-      genre: "Pop",
-      sentiment_analysis: 0.3,
-    },
+    trackId: "song11",
   },
   {
     id: 12,
@@ -242,14 +160,7 @@ export const MOCK_LISTENERS = [
       longitude: -122.261,
       city: "Berkeley",
     },
-    track: {
-      name: "Pink Pony Club",
-      artist: "Chappell Roan",
-      albumArt:
-        ALBUM_ARTS.pinkPonyClub,
-      genre: "Pop",
-      sentiment_analysis: 0.9,
-    },
+    trackId: "song12",
   },
   {
     id: 13,
@@ -262,15 +173,7 @@ export const MOCK_LISTENERS = [
       longitude: -122.272,
       city: "Berkeley",
     },
-    track: {
-      name: "Not Like Us",
-      artist: "Kendrick Lamar",
-      audioUrl: "/assets/notlikeus.mp3",
-      albumArt:
-        ALBUM_ARTS.notLikeUs,
-      genre: "Hip Hop",
-      sentiment_analysis: 0.6,
-    },
+    trackId: "song2",
   },
   {
     id: 14,
@@ -283,15 +186,7 @@ export const MOCK_LISTENERS = [
       longitude: -122.260,
       city: "Berkeley",
     },
-    track: {
-      name: "Not Like Us",
-      artist: "Kendrick Lamar",
-      audioUrl: "/assets/notlikeus.mp3",
-      albumArt:
-        ALBUM_ARTS.notLikeUs,
-      genre: "Hip Hop",
-      sentiment_analysis: 0.6,
-    },
+    trackId: "song2",
   },
 ];
 

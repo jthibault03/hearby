@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import "./ListenersPanel.css";
+import { getSongById } from "../services/mockSongData";
 
 const ListenersPanel = ({ listeners, onTrackSelect }) => {
   const [listHeight, setListHeight] = useState(50);
@@ -63,6 +64,45 @@ const ListenersPanel = ({ listeners, onTrackSelect }) => {
     };
   }, [isDragging, handleMove, handleEnd]);
 
+  const listenerCards = listeners.map((listener) => {
+    const track = getSongById(listener.trackId) || {};
+
+    return (
+      <div key={listener.id} className="listener-card">
+        <img src={track.albumArt} alt={track.name} className="card-album-art" />
+        <div className="card-info">
+          <div className="card-track">{track.name}</div>
+          <div className="card-artist">{track.artist}</div>
+          <div className="card-meta">
+            <span className="card-user">
+              {listener.isFriend ? listener.displayName : "Nearby User"}
+            </span>
+            <span className="card-location"> • {listener.location.city}</span>
+          </div>
+        </div>
+        <div className="card-action">
+          <button className="play-btn" onClick={() => onTrackSelect(track)}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              width="21"
+              height="21"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    );
+  });
+
   return (
     <div
       className={`listeners-panel ${isDragging ? "dragging" : ""}`}
@@ -85,50 +125,7 @@ const ListenersPanel = ({ listeners, onTrackSelect }) => {
 
       {listHeight > 15 && (
         <div className="panel-content">
-          {listeners.map((listener) => (
-            <div key={listener.id} className="listener-card">
-              <img
-                src={listener.track.albumArt}
-                alt={listener.track.album}
-                className="card-album-art"
-              />
-              <div className="card-info">
-                <div className="card-track">{listener.track.name}</div>
-                <div className="card-artist">{listener.track.artist}</div>
-                <div className="card-meta">
-                  <span className="card-user">
-                    {listener.isFriend ? listener.displayName : "Nearby User"}
-                  </span>
-                  <span className="card-location">
-                    {" "}
-                    • {listener.location.city}
-                  </span>
-                </div>
-              </div>
-              <div className="card-action">
-                <button
-                  className="play-btn"
-                  onClick={() => onTrackSelect(listener.track)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    width="21"
-                    height="21"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          ))}
+          {listenerCards}
         </div>
       )}
     </div>

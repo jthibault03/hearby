@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import "./AIFilterPanel.css";
+import { getSongById } from "../services/mockSongData";
 
 const AIFilterPanel = ({ listeners, onClose, onTrackSelect }) => {
   const [selectedGenre, setSelectedGenre] = useState(null);
@@ -9,8 +10,9 @@ const AIFilterPanel = ({ listeners, onClose, onTrackSelect }) => {
   const genres = useMemo(() => {
     const genreSet = new Set();
     listeners.forEach((listener) => {
-      if (listener.track.genre) {
-        genreSet.add(listener.track.genre);
+      const track = getSongById(listener.trackId) || {};
+      if (track.genre) {
+        genreSet.add(track.genre);
       }
     });
     return Array.from(genreSet).sort();
@@ -20,28 +22,45 @@ const AIFilterPanel = ({ listeners, onClose, onTrackSelect }) => {
   const filteredListeners = useMemo(() => {
     if (!selectedGenre) return [];
 
-    let filtered = listeners.filter(
-      (listener) => listener.track.genre === selectedGenre
-    );
+    let filtered = listeners.filter((listener) => {
+      const track = getSongById(listener.trackId) || {};
+      return track.genre === selectedGenre;
+    });
 
     // Sort based on sentiment
     if (sentimentSort === "happy") {
       // Sort by sentiment (highest first), but keep friends at top
       const friends = filtered
         .filter((l) => l.isFriend)
-        .sort((a, b) => (b.track.sentiment_analysis || 0) - (a.track.sentiment_analysis || 0));
+        .sort((a, b) => {
+          const ta = getSongById(a.trackId) || {};
+          const tb = getSongById(b.trackId) || {};
+          return (tb.sentiment_analysis || 0) - (ta.sentiment_analysis || 0);
+        });
       const nonFriends = filtered
         .filter((l) => !l.isFriend)
-        .sort((a, b) => (b.track.sentiment_analysis || 0) - (a.track.sentiment_analysis || 0));
+        .sort((a, b) => {
+          const ta = getSongById(a.trackId) || {};
+          const tb = getSongById(b.trackId) || {};
+          return (tb.sentiment_analysis || 0) - (ta.sentiment_analysis || 0);
+        });
       return [...friends, ...nonFriends];
     } else if (sentimentSort === "sad") {
       // Sort by sentiment (lowest first), but keep friends at top
       const friends = filtered
         .filter((l) => l.isFriend)
-        .sort((a, b) => (a.track.sentiment_analysis || 0) - (b.track.sentiment_analysis || 0));
+        .sort((a, b) => {
+          const ta = getSongById(a.trackId) || {};
+          const tb = getSongById(b.trackId) || {};
+          return (ta.sentiment_analysis || 0) - (tb.sentiment_analysis || 0);
+        });
       const nonFriends = filtered
         .filter((l) => !l.isFriend)
-        .sort((a, b) => (a.track.sentiment_analysis || 0) - (b.track.sentiment_analysis || 0));
+        .sort((a, b) => {
+          const ta = getSongById(a.trackId) || {};
+          const tb = getSongById(b.trackId) || {};
+          return (ta.sentiment_analysis || 0) - (tb.sentiment_analysis || 0);
+        });
       return [...friends, ...nonFriends];
     } else {
       // neutral: friends first, then others
@@ -107,61 +126,61 @@ const AIFilterPanel = ({ listeners, onClose, onTrackSelect }) => {
                   No listeners found for {selectedGenre}
                 </div>
               ) : (
-                filteredListeners.map((listener) => (
-                  <div key={listener.id} className="listener-card">
-                    <img
-                      src={listener.track.albumArt}
-                      alt={listener.track.album}
-                      className="card-album-art"
-                    />
-                    <div className="card-info">
-                      <div className="card-track">{listener.track.name}</div>
-                      <div className="card-artist">{listener.track.artist}</div>
-                      <div className="card-meta">
-                        <span className="card-user">
-                          {listener.isFriend ? listener.displayName : "Nearby User"}
-                          {listener.isFriend && (
-                            <span className="friend-badge">Friend</span>
-                          )}
-                        </span>
-                        <span className="card-location">
-                          {" "}
-                          • {listener.location.city}
-                        </span>
-                      </div>
-                      {listener.track.sentiment_analysis !== undefined && (
-                        <div className="card-sentiment">
-                          Mood: {Math.round(listener.track.sentiment_analysis * 100)}%
+                filteredListeners.map((listener) => {
+                  const track = getSongById(listener.trackId) || {};
+                  return (
+                    <div key={listener.id} className="listener-card">
+                      <img
+                        src={track.albumArt}
+                        alt={track.name}
+                        className="card-album-art"
+                      />
+                      <div className="card-info">
+                        <div className="card-track">{track.name}</div>
+                        <div className="card-artist">{track.artist}</div>
+                        <div className="card-meta">
+                          <span className="card-user">
+                            {listener.isFriend ? listener.displayName : "Nearby User"}
+                            {listener.isFriend && (
+                              <span className="friend-badge">Friend</span>
+                            )}
+                          </span>
+                          <span className="card-location"> • {listener.location.city}</span>
                         </div>
-                      )}
-                    </div>
-                    <div className="card-action">
-                      <button
-                        className="play-btn"
-                        onClick={() => {
-                          onTrackSelect(listener.track);
-                          onClose();
-                        }}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={1.5}
-                          stroke="currentColor"
-                          width="21"
-                          height="21"
+                        {track.sentiment_analysis !== undefined && (
+                          <div className="card-sentiment">
+                            Mood: {Math.round(track.sentiment_analysis * 100)}%
+                          </div>
+                        )}
+                      </div>
+                      <div className="card-action">
+                        <button
+                          className="play-btn"
+                          onClick={() => {
+                            onTrackSelect(track);
+                            onClose();
+                          }}
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
-                          />
-                        </svg>
-                      </button>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
+                            width="21"
+                            height="21"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </>
