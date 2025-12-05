@@ -11,13 +11,17 @@ export const MOCK_USER = {
 const BASE_LAT = 37.8715;
 const BASE_LNG = -122.273;
 
-// ~1 mile radius for campus cluster
-const CAMPUS_LAT_RADIUS = 0.015; // ~1 mile north/south
-const CAMPUS_LNG_RADIUS = 0.02;  // ~1 mile east/west
+// Second cluster center (e.g., San Francisco coordinate you provided)
+const SF_LAT = 37.73630402100359;
+const SF_LNG = -122.44985207052321;
 
-// ~5 mile radius for broader Bay Area
-const CITY_LAT_RADIUS = 0.0725;  // ~5 miles
-const CITY_LNG_RADIUS = 0.0917;  // ~5 miles
+// ~1 mile radius for campus cluster
+const CAMPUS_LAT_RADIUS = 0.05; // ~1 mile north/south
+const CAMPUS_LNG_RADIUS = 0.03;  // ~1 mile east/west
+
+// ~5 mile radius for broader Bay Area around each cluster
+const CITY_LAT_RADIUS = 0.0725; 
+const CITY_LNG_RADIUS = 0.0537;  
 
 
 
@@ -210,20 +214,24 @@ const BASE_LISTENERS = [
 
 
 // Generate an anonymous nearby listener for every song in the dataset,
-// with ~70% tightly around campus and ~30% in a wider 5-mile radius.
+// split between a UC Berkeley cluster and a San Francisco cluster.
 const songIds = Object.keys(songData);
 
-// Heavier weight near campus: e.g. 70% campus, 30% broader city
-const campusCount = Math.floor(songIds.length * 0.7);
+// Split between clusters: e.g. 60% Berkeley, 40% SF
+const berkeleyCount = Math.floor(songIds.length * 0.6);
 
 const GENERATED_SONG_LISTENERS = songIds.map((songId, index) => {
-  const isCampus = index < campusCount;
+  const isBerkeley = index < berkeleyCount;
 
-  const latRadius = isCampus ? CAMPUS_LAT_RADIUS : CITY_LAT_RADIUS;
-  const lngRadius = isCampus ? CAMPUS_LNG_RADIUS : CITY_LNG_RADIUS;
+  // Berkeley listeners: mostly tight around campus, SF listeners: tighter city-ish radius
+  const latRadius = isBerkeley ? CAMPUS_LAT_RADIUS : CITY_LAT_RADIUS;
+  const lngRadius = isBerkeley ? CAMPUS_LNG_RADIUS : CITY_LNG_RADIUS;
 
   const dLat = (Math.random() - 0.5) * 2 * latRadius;
   const dLng = (Math.random() - 0.5) * 2 * lngRadius;
+
+  const baseLat = isBerkeley ? BASE_LAT : SF_LAT;
+  const baseLng = isBerkeley ? BASE_LNG : SF_LNG;
 
   return {
     id: BASE_LISTENERS.length + index + 1,
@@ -232,9 +240,9 @@ const GENERATED_SONG_LISTENERS = songIds.map((songId, index) => {
     isFriend: false,
     zoneId: "downtown",
     location: {
-      latitude: BASE_LAT + dLat,
-      longitude: BASE_LNG + dLng,
-      city: "Berkeley",
+      latitude: baseLat + dLat,
+      longitude: baseLng + dLng,
+      city: isBerkeley ? "Berkeley" : "San Francisco",
     },
     trackId: songId,
   };

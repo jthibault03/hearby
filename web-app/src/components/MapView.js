@@ -142,11 +142,11 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
         ref={setMap}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
 
-        <HeatmapLayer points={heatmapPoints} radius={500} blur={20} />
+        <HeatmapLayer points={heatmapPoints} radius={45} blur={35} maxZoom={1.5} />
 
         {userLocation && (
           <Marker
