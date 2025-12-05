@@ -29,11 +29,18 @@ const addJitter = (lat, lng) => {
 };
 
 const createAlbumIcon = (albumArtUrl, isFriend) => {
+  if (!isFriend) {
+    return L.divIcon({
+      className: "album-marker",
+      html: '<div class="album-art-marker ghost-marker"></div>',
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
+    });
+  }
+
   return L.divIcon({
     className: "album-marker",
-    html: `<div class="album-art-marker ${
-      isFriend ? "friend-marker" : "ghost-marker"
-    }" style="background-image: url('${albumArtUrl}')"></div>`,
+    html: `<div class="album-art-marker friend-marker" style="background-image: url('${albumArtUrl}')"></div>`,
     iconSize: [40, 40],
     iconAnchor: [20, 20],
   });
@@ -99,35 +106,31 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
   );
 
   const heatmapPoints = useMemo(() => {
-    const points = [];
-    const random = (max) => (Math.random() - 0.5) * max;
+    if (!MOCK_LISTENERS || MOCK_LISTENERS.length === 0) return [];
 
-    const addCluster = (centerLat, centerLng, count, baseIntensity, spread) => {
-      for (let i = 0; i < count; i++) {
-        points.push({
-          lat: centerLat + random(spread),
-          lng: centerLng + random(spread),
-          intensity: baseIntensity * (0.7 + Math.random() * 0.3),
-        });
+    // Density-based intensity: count listeners within a small radius.
+    const RADIUS_DEGREES = 0.01; // ~0.6 miles; tweak as needed
+
+    const points = MOCK_LISTENERS.map((listener) => {
+      const { latitude, longitude } = listener.location;
+
+      let neighbors = 0;
+      for (const other of MOCK_LISTENERS) {
+        const dLat = other.location.latitude - latitude;
+        const dLng = other.location.longitude - longitude;
+        if (Math.abs(dLat) <= RADIUS_DEGREES && Math.abs(dLng) <= RADIUS_DEGREES) {
+          neighbors += 1;
+        }
       }
-    };
 
-    const [fallbackLat, fallbackLng] = DEFAULT_CENTER;
-    const lat = userLocation ? userLocation.latitude : fallbackLat;
-    const lng = userLocation ? userLocation.longitude : fallbackLng;
+      // Map neighbor count to 0..1 and clamp.
+      const intensity = Math.min(1, neighbors / 20); // 20 listeners => max heat
 
-    addCluster(lat, lng, 30, 0.9, 0.0015);
-    addCluster(lat, lng, 25, 0.6, 0.003);
-
-    FEATURED_CITY_CLUSTERS.forEach(
-      ({ lat: cityLat, lng: cityLng, baseIntensity }) => {
-        addCluster(cityLat, cityLng, 40, baseIntensity, 0.03);
-        addCluster(cityLat, cityLng, 30, baseIntensity * 0.7, 0.06);
-      }
-    );
+      return [latitude, longitude, intensity];
+    });
 
     return points;
-  }, [userLocation]);
+  }, []);
 
   return (
     <div className="map-view">
@@ -143,7 +146,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         />
 
-        <HeatmapLayer points={heatmapPoints} radius={25} blur={20} />
+        <HeatmapLayer points={heatmapPoints} radius={500} blur={20} />
 
         {userLocation && (
           <Marker
@@ -179,11 +182,13 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
             >
               <Popup className="music-popup">
                 <div className="popup-content">
-                  <img
-                    src={track?.albumArt}
-                    alt="Album"
-                    className="popup-album"
-                  />
+                  {listener.isFriend && (
+                    <img
+                      src={track?.albumArt}
+                      alt="Album"
+                      className="popup-album"
+                    />
+                  )}
                   <div className="popup-info">
                     <strong>{track?.name}</strong>
                     <p>

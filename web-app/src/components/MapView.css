@@ -25,12 +25,12 @@
   /* Friends on top */
 }
 
-/* Ghost Marker (Strangers) */
 .album-art-marker.ghost-marker {
-  opacity: 0.6;
-  filter: grayscale(30%);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: scale(0.9);
+  opacity: 0;
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  transform: scale(1); /* or whatever, doesn’t matter visually */
 }
 
 /* Recenter Button */

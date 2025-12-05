@@ -1,3 +1,5 @@
+import songData from "./mockSongData.generated.json";
+
 export const MOCK_USER = {
   id: "current-user",
   displayName: "You",
@@ -5,7 +7,22 @@ export const MOCK_USER = {
   location: { latitude: 37.8715, longitude: -122.273, city: "Berkeley" }, // Downtown Berkeley
 };
 
-export const MOCK_LISTENERS = [
+// Base reference for UC Berkeley campus
+const BASE_LAT = 37.8715;
+const BASE_LNG = -122.273;
+
+// ~1 mile radius for campus cluster
+const CAMPUS_LAT_RADIUS = 0.015; // ~1 mile north/south
+const CAMPUS_LNG_RADIUS = 0.02;  // ~1 mile east/west
+
+// ~5 mile radius for broader Bay Area
+const CITY_LAT_RADIUS = 0.0725;  // ~5 miles
+const CITY_LNG_RADIUS = 0.0917;  // ~5 miles
+
+
+
+// Hand-authored listeners (friends + a few nearby people)
+const BASE_LISTENERS = [
   {
     id: 1,
     displayName: "Sarah M.",
@@ -13,24 +30,24 @@ export const MOCK_LISTENERS = [
     isFriend: true,
     zoneId: "downtown",
     location: {
-      latitude: 37.8715,
-      longitude: -122.273,
+      latitude: 37.8725,
+      longitude: -122.268,
       city: "Berkeley",
     },
-    trackId: "song87",
+    trackId: "song1",
   },
   {
     id: 2,
-    displayName: "Mike J.",
-    username: "mike_j",
-    isFriend: false,
-    zoneId: "downtown",
+    displayName: "James H.",
+    username: "james_h",
+    isFriend: true,
+    zoneId: "campus",
     location: {
       latitude: 37.872,
-      longitude: -122.274,
+      longitude: -122.26,
       city: "Berkeley",
     },
-    trackId: "song86",
+    trackId: "song10",
   },
   {
     id: 3,
@@ -183,12 +200,47 @@ export const MOCK_LISTENERS = [
     zoneId: "campus",
     location: {
       latitude: 37.8745,
-      longitude: -122.260,
+      longitude: -122.26,
       city: "Berkeley",
     },
     trackId: "song7",
   },
 ];
+
+
+
+// Generate an anonymous nearby listener for every song in the dataset,
+// with ~70% tightly around campus and ~30% in a wider 5-mile radius.
+const songIds = Object.keys(songData);
+
+// Heavier weight near campus: e.g. 70% campus, 30% broader city
+const campusCount = Math.floor(songIds.length * 0.7);
+
+const GENERATED_SONG_LISTENERS = songIds.map((songId, index) => {
+  const isCampus = index < campusCount;
+
+  const latRadius = isCampus ? CAMPUS_LAT_RADIUS : CITY_LAT_RADIUS;
+  const lngRadius = isCampus ? CAMPUS_LNG_RADIUS : CITY_LNG_RADIUS;
+
+  const dLat = (Math.random() - 0.5) * 2 * latRadius;
+  const dLng = (Math.random() - 0.5) * 2 * lngRadius;
+
+  return {
+    id: BASE_LISTENERS.length + index + 1,
+    displayName: "Nearby Listener",
+    username: `anon_${songId}`,
+    isFriend: false,
+    zoneId: "downtown",
+    location: {
+      latitude: BASE_LAT + dLat,
+      longitude: BASE_LNG + dLng,
+      city: "Berkeley",
+    },
+    trackId: songId,
+  };
+});
+
+export const MOCK_LISTENERS = [...BASE_LISTENERS, ...GENERATED_SONG_LISTENERS];
 
 export const MOCK_FRIENDS = [
   {

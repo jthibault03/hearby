@@ -190,7 +190,7 @@ async function main() {
     };
 
     // Limit to a reasonable number if desired
-    if (idx >= 300) break;
+    if (idx >= 3000) break;
   }
 
   const outPath = path.resolve(baseDir, OUTPUT_JSON_RELATIVE);
