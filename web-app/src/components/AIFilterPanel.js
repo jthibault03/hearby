@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import "./AIFilterPanel.css";
+import songData from "../services/mockSongData.generated.json";
 
 const AIFilterPanel = ({ listeners, onClose, onTrackSelect }) => {
   const [selectedGenre, setSelectedGenre] = useState(null);
@@ -9,8 +10,9 @@ const AIFilterPanel = ({ listeners, onClose, onTrackSelect }) => {
   const genres = useMemo(() => {
     const genreSet = new Set();
     listeners.forEach((listener) => {
-      if (listener.track.genre) {
-        genreSet.add(listener.track.genre);
+      const track = songData[listener.trackId];
+      if (track?.genres) {
+        track.genres.forEach((g) => genreSet.add(g));
       }
     });
     return Array.from(genreSet).sort();
@@ -20,28 +22,45 @@ const AIFilterPanel = ({ listeners, onClose, onTrackSelect }) => {
   const filteredListeners = useMemo(() => {
     if (!selectedGenre) return [];
 
-    let filtered = listeners.filter(
-      (listener) => listener.track.genre === selectedGenre
-    );
+    let filtered = listeners.filter((listener) => {
+      const track = songData[listener.trackId];
+      return track?.genres?.includes(selectedGenre);
+    });
 
     // Sort based on sentiment
     if (sentimentSort === "happy") {
       // Sort by sentiment (highest first), but keep friends at top
       const friends = filtered
         .filter((l) => l.isFriend)
-        .sort((a, b) => (b.track.sentiment_analysis || 0) - (a.track.sentiment_analysis || 0));
+        .sort(
+          (a, b) =>
+            (songData[b.trackId]?.sentiment_analysis || 0) -
+            (songData[a.trackId]?.sentiment_analysis || 0)
+        );
       const nonFriends = filtered
         .filter((l) => !l.isFriend)
-        .sort((a, b) => (b.track.sentiment_analysis || 0) - (a.track.sentiment_analysis || 0));
+        .sort(
+          (a, b) =>
+            (songData[b.trackId]?.sentiment_analysis || 0) -
+            (songData[a.trackId]?.sentiment_analysis || 0)
+        );
       return [...friends, ...nonFriends];
     } else if (sentimentSort === "sad") {
       // Sort by sentiment (lowest first), but keep friends at top
       const friends = filtered
         .filter((l) => l.isFriend)
-        .sort((a, b) => (a.track.sentiment_analysis || 0) - (b.track.sentiment_analysis || 0));
+        .sort(
+          (a, b) =>
+            (songData[a.trackId]?.sentiment_analysis || 0) -
+            (songData[b.trackId]?.sentiment_analysis || 0)
+        );
       const nonFriends = filtered
         .filter((l) => !l.isFriend)
-        .sort((a, b) => (a.track.sentiment_analysis || 0) - (b.track.sentiment_analysis || 0));
+        .sort(
+          (a, b) =>
+            (songData[a.trackId]?.sentiment_analysis || 0) -
+            (songData[b.trackId]?.sentiment_analysis || 0)
+        );
       return [...friends, ...nonFriends];
     } else {
       // neutral: friends first, then others
@@ -107,16 +126,23 @@ const AIFilterPanel = ({ listeners, onClose, onTrackSelect }) => {
                   No listeners found for {selectedGenre}
                 </div>
               ) : (
-                filteredListeners.map((listener) => (
-                  <div key={listener.id} className="listener-card">
-                    <img
-                      src={listener.track.albumArt}
-                      alt={listener.track.album}
-                      className="card-album-art"
-                    />
-                    <div className="card-info">
-                      <div className="card-track">{listener.track.name}</div>
-                      <div className="card-artist">{listener.track.artist}</div>
+                filteredListeners.map((listener) => {
+                  const track = songData[listener.trackId];
+                  const sentiment = track?.sentiment_analysis;
+                  return (
+                    <div key={listener.id} className="listener-card">
+                      <img
+                        src={track?.albumArt}
+                        alt={track?.album}
+                        className="card-album-art"
+                      />
+                      <div className="card-info">
+                        <div className="card-track">{track?.name}</div>
+                        <div className="card-artist">
+                          {Array.isArray(track?.artist)
+                            ? track.artist.join(", ")
+                            : track?.artist}
+                        </div>
                       <div className="card-meta">
                         <span className="card-user">
                           {listener.isFriend ? listener.displayName : "Nearby User"}
@@ -124,14 +150,11 @@ const AIFilterPanel = ({ listeners, onClose, onTrackSelect }) => {
                             <span className="friend-badge">Friend</span>
                           )}
                         </span>
-                        <span className="card-location">
-                          {" "}
-                          • {listener.location.city}
-                        </span>
+                        <span className="card-location"> • {listener.location.city}</span>
                       </div>
-                      {listener.track.sentiment_analysis !== undefined && (
+                      {sentiment !== undefined && (
                         <div className="card-sentiment">
-                          Mood: {Math.round(listener.track.sentiment_analysis * 100)}%
+                          Mood: {Math.round(sentiment * 100)}%
                         </div>
                       )}
                     </div>
@@ -139,7 +162,7 @@ const AIFilterPanel = ({ listeners, onClose, onTrackSelect }) => {
                       <button
                         className="play-btn"
                         onClick={() => {
-                          onTrackSelect(listener.track);
+                          onTrackSelect(track);
                           onClose();
                         }}
                       >
@@ -161,7 +184,8 @@ const AIFilterPanel = ({ listeners, onClose, onTrackSelect }) => {
                       </button>
                     </div>
                   </div>
-                ))
+                );
+                })
               )}
             </div>
           </>

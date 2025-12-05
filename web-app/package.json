@@ -7,8 +7,11 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
+    "csv-parse": "^6.1.0",
+    "dotenv": "^17.2.3",
     "leaflet": "^1.9.4",
     "leaflet.heat": "^0.2.0",
+    "node-fetch": "^3.3.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-leaflet": "^5.0.0",
@@ -19,7 +22,10 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "fetch:songs": "node ./scripts/fetchSpotifySongs.mjs",
+    "generate:songs": "node ./scripts/generateFromKaggle.mjs",
+    "enrich:songs": "node ./scripts/enrichFromSpotify.mjs"
   },
   "eslintConfig": {
     "extends": [

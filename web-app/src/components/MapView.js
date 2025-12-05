@@ -7,6 +7,7 @@ import "./MapView.css";
 import locationManager from "../services/LocationManager";
 import spotifyManager from "../services/SpotifyManager";
 import { MOCK_LISTENERS, MOCK_FRIENDS, MOCK_USER } from "../services/mockData";
+import songData from "../services/mockSongData.generated.json";
 import CurrentTrack from "./CurrentTrack";
 import ListenersPanel from "./ListenersPanel";
 import HeatmapLayer from "./HeatmapLayer";
@@ -162,6 +163,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
         )}
 
         {MOCK_LISTENERS.map((listener) => {
+          const track = songData[listener.trackId];
           const position = listener.isFriend
             ? [listener.location.latitude, listener.location.longitude]
             : addJitter(
@@ -173,18 +175,22 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
             <Marker
               key={listener.id}
               position={position}
-              icon={createAlbumIcon(listener.track.albumArt, listener.isFriend)}
+              icon={createAlbumIcon(track?.albumArt, listener.isFriend)}
             >
               <Popup className="music-popup">
                 <div className="popup-content">
                   <img
-                    src={listener.track.albumArt}
+                    src={track?.albumArt}
                     alt="Album"
                     className="popup-album"
                   />
                   <div className="popup-info">
-                    <strong>{listener.track.name}</strong>
-                    <p>{listener.track.artist}</p>
+                    <strong>{track?.name}</strong>
+                    <p>
+                      {Array.isArray(track?.artist)
+                        ? track.artist.join(", ")
+                        : track?.artist}
+                    </p>
                     <span className="listener-name-wrapper">
                       <span className="listener-name">
                         {listener.isFriend ? (

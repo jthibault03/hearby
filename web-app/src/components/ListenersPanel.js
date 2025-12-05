@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import "./ListenersPanel.css";
+import songData from "../services/mockSongData.generated.json";
 
 const ListenersPanel = ({ listeners, onTrackSelect }) => {
   const [listHeight, setListHeight] = useState(50);
@@ -85,16 +86,22 @@ const ListenersPanel = ({ listeners, onTrackSelect }) => {
 
       {listHeight > 15 && (
         <div className="panel-content">
-          {listeners.map((listener) => (
-            <div key={listener.id} className="listener-card">
-              <img
-                src={listener.track.albumArt}
-                alt={listener.track.album}
-                className="card-album-art"
-              />
-              <div className="card-info">
-                <div className="card-track">{listener.track.name}</div>
-                <div className="card-artist">{listener.track.artist}</div>
+          {listeners.map((listener) => {
+            const track = songData[listener.trackId];
+            return (
+              <div key={listener.id} className="listener-card">
+                <img
+                  src={track?.albumArt}
+                  alt={track?.album}
+                  className="card-album-art"
+                />
+                <div className="card-info">
+                  <div className="card-track">{track?.name}</div>
+                  <div className="card-artist">
+                    {Array.isArray(track?.artist)
+                      ? track.artist.join(", ")
+                      : track?.artist}
+                  </div>
                 <div className="card-meta">
                   <span className="card-user">
                     {listener.isFriend ? listener.displayName : "Nearby User"}
@@ -105,11 +112,11 @@ const ListenersPanel = ({ listeners, onTrackSelect }) => {
                   </span>
                 </div>
               </div>
-              <div className="card-action">
-                <button
-                  className="play-btn"
-                  onClick={() => onTrackSelect(listener.track)}
-                >
+                <div className="card-action">
+                  <button
+                    className="play-btn"
+                    onClick={() => onTrackSelect(track)}
+                  >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -125,10 +132,11 @@ const ListenersPanel = ({ listeners, onTrackSelect }) => {
                       d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
                     />
                   </svg>
-                </button>
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
