@@ -28,6 +28,9 @@ const addJitter = (lat, lng) => {
   ];
 };
 
+// Ensure we always fetch listeners in at least a ~0.75km radius even when very zoomed in.
+const MIN_SEARCH_RADIUS_METERS = 750;
+
 const createAlbumIcon = (albumArtUrl, isFriend) => {
   if (!isFriend) {
     return L.divIcon({
@@ -138,8 +141,15 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
 
     const updateVisibleListeners = () => {
       const bounds = map.getBounds();
+      const center = bounds.getCenter();
+      const minimumBounds = center.toBounds(MIN_SEARCH_RADIUS_METERS);
+      const searchBounds = L.latLngBounds(
+        bounds.getSouthWest(),
+        bounds.getNorthEast()
+      ).extend(minimumBounds);
+
       const inView = MOCK_LISTENERS.filter((listener) =>
-        bounds.contains([
+        searchBounds.contains([
           listener.location.latitude,
           listener.location.longitude,
         ])

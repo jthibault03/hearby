@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import boothManager from "../services/BoothManager";
-import "./CollabBoothScreen.css";
+import "./CollabBoothListScreen.css";
 
-const CollabBoothScreen = ({ onBack }) => {
+const CollabBoothListScreen = ({ onBack }) => {
   const [booths, setBooths] = useState(boothManager.getAllBooths());
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newBoothName, setNewBoothName] = useState("");
@@ -105,4 +105,4 @@ const CollabBoothScreen = ({ onBack }) => {
   );
 };
 
-export default CollabBoothScreen;
+export default CollabBoothListScreen;

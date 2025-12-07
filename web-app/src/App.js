@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import "./App.css";
 import SpotifyAuth from "./components/SpotifyAuth";
 import MapView from "./components/MapView";
-import CollabBoothScreen from "./screens/CollabBoothScreen";
+import CollabBoothListScreen from "./screens/CollabBoothListScreen";
 import ProfileSettings from "./screens/ProfileSettings";
 
 function App() {
@@ -20,7 +20,7 @@ function App() {
 
   switch (currentScreen) {
     case 'collab':
-      return <CollabBoothScreen onBack={() => setCurrentScreen('map')} />;
+      return <CollabBoothListScreen onBack={() => setCurrentScreen('map')} />;
     case 'settings':
       return <ProfileSettings onBack={() => setCurrentScreen('map')} onLogout={handleLogout} />;
     case 'map':

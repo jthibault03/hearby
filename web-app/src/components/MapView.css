@@ -340,6 +340,17 @@
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
+  .top-bar {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .top-actions {
+    gap: 8px;
+    flex-wrap: nowrap;
+    padding-bottom: 0;
+  }
+
   .center-button {
     bottom: 120px;
     right: 15px;

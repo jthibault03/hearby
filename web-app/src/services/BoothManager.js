@@ -13,6 +13,11 @@ class BoothManager {
   }
 
   async createBooth(name, currentTrack) {
+    // Ensure the user isn't already in another booth before creating and joing a new one
+    if (this.currentBooth) {
+      this.leaveBooth(this.currentBooth.id);
+    }
+
     let track = currentTrack;
 
     if (!track) {
