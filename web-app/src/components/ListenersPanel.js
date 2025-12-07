@@ -7,6 +7,7 @@ const ListenersPanel = ({ listeners, onTrackSelect }) => {
   const [isDragging, setIsDragging] = useState(false);
   const startY = useRef(0);
   const startHeight = useRef(0);
+  const rafId = useRef(null);
 
   const snapToClosest = useCallback((height) => {
     const snapPoints = [15, 50, 75];
@@ -25,20 +26,28 @@ const ListenersPanel = ({ listeners, onTrackSelect }) => {
   const handleMove = useCallback(
     (clientY) => {
       if (!isDragging) return;
-      const deltaY = startY.current - clientY;
-      const windowHeight = window.innerHeight - 64;
-      const deltaPercent = (deltaY / windowHeight) * 100;
-      const newHeight = Math.max(
-        10,
-        Math.min(75, startHeight.current + deltaPercent)
-      );
-      setListHeight(newHeight);
+
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+
+      rafId.current = requestAnimationFrame(() => {
+        const deltaY = startY.current - clientY;
+        const windowHeight = window.innerHeight - 64;
+        const deltaPercent = (deltaY / windowHeight) * 100;
+
+        const newHeight = Math.max(
+          10,
+          Math.min(75, startHeight.current + deltaPercent)
+        );
+
+        setListHeight(newHeight);
+      });
     },
     [isDragging]
   );
 
   const handleEnd = useCallback(() => {
     setIsDragging(false);
+    if (rafId.current) cancelAnimationFrame(rafId.current);
     snapToClosest(listHeight);
   }, [listHeight, snapToClosest]);
 
