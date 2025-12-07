@@ -311,7 +311,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
             <div
               className="avatar"
               style={{
-                backgroundImage: `url(https://i.pravatar.cc/150?u=${MOCK_USER.username})`,
+                backgroundImage: `url(https://i.pravatar.cc/150?u=${MOCK_USER.id})`,
               }}
             ></div>
           </button>

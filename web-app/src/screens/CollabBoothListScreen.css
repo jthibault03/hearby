@@ -183,6 +183,32 @@
   background: #505050;
 }
 
+.room-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.enter-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.enter-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.enter-btn:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;

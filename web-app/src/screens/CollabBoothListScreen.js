@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import boothManager from "../services/BoothManager";
 import "./CollabBoothListScreen.css";
 
-const CollabBoothListScreen = ({ onBack }) => {
+const CollabBoothListScreen = ({ onBack, onEnterBooth }) => {
   const [booths, setBooths] = useState(boothManager.getAllBooths());
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newBoothName, setNewBoothName] = useState("");
@@ -17,6 +17,11 @@ const CollabBoothListScreen = ({ onBack }) => {
   const handleJoinBooth = (boothId) => {
     boothManager.joinBooth(boothId);
     setBooths([...boothManager.getAllBooths()]);
+  };
+  const handleEnterBooth = (boothId) => {
+    if (boothManager.isInBooth(boothId)) {
+      onEnterBooth?.(boothId);
+    }
   };
 
   return (
@@ -64,7 +69,7 @@ const CollabBoothListScreen = ({ onBack }) => {
               <h2>{room.name}</h2>
               <div className="participants-row">
                 <div className="participant-avatars">
-                  {room.members?.slice(0, 3).map((member) => (
+                  {room.members?.slice(-3).map((member) => (
                     <div key={member.id} className="participant-avatar" title={member.displayName}>
                       <img
                         src={`https://i.pravatar.cc/100?u=${member.id}`}
@@ -90,14 +95,28 @@ const CollabBoothListScreen = ({ onBack }) => {
                 </div>
               </div>
             </div>
-            <button
-              className={`join-btn ${
-                boothManager.isInBooth(room.id) ? "joined" : ""
-              }`}
-              onClick={() => handleJoinBooth(room.id)}
-            >
-              {boothManager.isInBooth(room.id) ? "Joined ✓" : "Join"}
-            </button>
+            <div className="room-actions">
+              <button
+                className={`join-btn ${
+                  boothManager.isInBooth(room.id) ? "joined" : ""
+                }`}
+                onClick={() => handleJoinBooth(room.id)}
+              >
+                {boothManager.isInBooth(room.id) ? "Joined ✓" : "Join"}
+              </button>
+              <button
+                className="enter-btn"
+                disabled={!boothManager.isInBooth(room.id)}
+                onClick={() => handleEnterBooth(room.id)}
+                title={
+                  boothManager.isInBooth(room.id)
+                    ? "Enter booth"
+                    : "Join first to enter"
+                }
+              >
+                Enter
+              </button>
+            </div>
           </div>
         ))}
       </div>

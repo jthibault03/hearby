@@ -1,7 +1,7 @@
 import songData from "./mockSongData.generated.json";
 
 export const MOCK_USER = {
-  id: "current-user",
+  id: "demo_user",
   displayName: "You",
   username: "demo_user",
   location: { latitude: 37.8715, longitude: -122.273, city: "Berkeley" }, // Downtown Berkeley
@@ -267,6 +267,11 @@ export const MOCK_ROOMS = [
     id: "room1",
     name: "Marina Chill",
     participants: 12,
+    members: BASE_LISTENERS.slice(0, 5).map((m) => ({
+      id: m.id.toString(),
+      displayName: m.displayName,
+      username: m.username,
+    })),
     currentTrack: {
       name: "Passionfruit",
       artist: "Drake",
@@ -278,6 +283,11 @@ export const MOCK_ROOMS = [
     id: "room2",
     name: "Cal Study Vibes",
     participants: 8,
+    members: BASE_LISTENERS.slice(5, 10).map((m) => ({
+      id: m.id.toString(),
+      displayName: m.displayName,
+      username: m.username,
+    })),
     currentTrack: {
       name: "Lo-Fi Beats",
       artist: "Unknown",
@@ -288,6 +298,11 @@ export const MOCK_ROOMS = [
     id: "room3",
     name: "Telegraph Ave Hits",
     participants: 25,
+    members: BASE_LISTENERS.slice(10, 15).map((m) => ({
+      id: m.id.toString(),
+      displayName: m.displayName,
+      username: m.username,
+    })),
     currentTrack: {
       name: "Cruel Summer",
       artist: "Taylor Swift",

@@ -19,7 +19,7 @@ const ProfileSettings = ({ onBack, onLogout }) => {
           <div
             className="large-avatar"
             style={{
-              backgroundImage: `url(https://i.pravatar.cc/150?u=${MOCK_USER.username})`,
+              backgroundImage: `url(https://i.pravatar.cc/150?u=${MOCK_USER.id})`,
             }}
           ></div>
           <h2>{MOCK_USER.displayName}</h2>
