@@ -73,6 +73,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showAIFilter, setShowAIFilter] = useState(false);
   const [showSameSong, setShowSameSong] = useState(false);
+  const [visibleListeners, setVisibleListeners] = useState(MOCK_LISTENERS);
 
   useEffect(() => {
     locationManager
@@ -106,16 +107,16 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
   );
 
   const heatmapPoints = useMemo(() => {
-    if (!MOCK_LISTENERS || MOCK_LISTENERS.length === 0) return [];
+    if (!visibleListeners || visibleListeners.length === 0) return [];
 
     // Density-based intensity: count listeners within a small radius.
     const RADIUS_DEGREES = 0.01; // ~0.6 miles; tweak as needed
 
-    const points = MOCK_LISTENERS.map((listener) => {
+    const points = visibleListeners.map((listener) => {
       const { latitude, longitude } = listener.location;
 
       let neighbors = 0;
-      for (const other of MOCK_LISTENERS) {
+      for (const other of visibleListeners) {
         const dLat = other.location.latitude - latitude;
         const dLng = other.location.longitude - longitude;
         if (Math.abs(dLat) <= RADIUS_DEGREES && Math.abs(dLng) <= RADIUS_DEGREES) {
@@ -130,7 +131,32 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
     });
 
     return points;
-  }, []);
+  }, [visibleListeners]);
+
+  useEffect(() => {
+    if (!map) return;
+
+    const updateVisibleListeners = () => {
+      const bounds = map.getBounds();
+      const inView = MOCK_LISTENERS.filter((listener) =>
+        bounds.contains([
+          listener.location.latitude,
+          listener.location.longitude,
+        ])
+      );
+      setVisibleListeners(inView);
+    };
+
+    updateVisibleListeners();
+
+    map.on("moveend", updateVisibleListeners);
+    map.on("zoomend", updateVisibleListeners);
+
+    return () => {
+      map.off("moveend", updateVisibleListeners);
+      map.off("zoomend", updateVisibleListeners);
+    };
+  }, [map]);
 
   return (
     <div className="map-view">
@@ -282,7 +308,10 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
         </div>
       </div>
 
-      <ListenersPanel listeners={MOCK_LISTENERS} onTrackSelect={handleTrackSelect} />
+      <ListenersPanel
+        listeners={visibleListeners}
+        onTrackSelect={handleTrackSelect}
+      />
 
       <button
         className="recenter-btn"
