@@ -12,7 +12,7 @@ const HeatmapLayer = ({ points }) => {
     const heat = L.heatLayer(points, {
       radius: 50,
       blur: 15,
-      maxZoom: 17,
+      maxZoom: 18,
       max: 1.0,
       // Original blue -> red heatmap gradient
       gradient: {

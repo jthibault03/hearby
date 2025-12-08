@@ -437,6 +437,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
       <MapContainer
         center={mapCenter}
         zoom={14}
+        maxZoom={18}
         className="map-container"
         zoomControl={false}
         ref={setMap}
