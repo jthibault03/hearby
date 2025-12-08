@@ -285,9 +285,15 @@
 }
 
 .search-status {
+  position: absolute;
+  /* place to the left of the clear button so it never overlaps */
+  right: 46px;
+  top: 50%;
+  transform: translateY(-50%);
   color: rgba(255,255,255,0.7);
   font-size: 0.85rem;
-  margin-left: 6px;
+  white-space: nowrap;
+  z-index: 3;
 }
 
 /* Position the clear button inside the input on the right */
@@ -318,6 +324,57 @@
 @media (max-width: 768px) {
   .search-input { padding-right: 40px; }
   .search-clear-btn { right: 4px; width: 30px; height: 30px; }
+}
+
+/* Mobile layout: stack the search bar above action buttons */
+@media (max-width: 768px) {
+  .top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: calc(max(12px, env(safe-area-inset-top))) 12px 12px 12px;
+  }
+
+  .search-wrapper {
+    width: 100%;
+    display: block;
+  }
+
+  .search-input {
+    width: 100%;
+    max-width: 100%;
+    padding-right: 56px; /* room for clear button and status */
+    box-sizing: border-box;
+  }
+
+  .search-clear-btn {
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .search-status {
+    right: 44px; /* sits to the left of the clear button */
+    font-size: 0.85rem;
+  }
+
+  .top-actions {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .app-title {
+    margin-left: 4px;
+    font-size: 1.25rem;
+  }
+
+  /* push the profile/avatar button to the far right on mobile */
+  .settings-btn {
+    margin-left: auto;
+  }
 }
 
 .settings-btn {

@@ -527,7 +527,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
           <input
             className="search-input"
             type="text"
-            placeholder='Search vibes… e.g. "sunday vibes" or "music from 1985"'
+            placeholder='Search for listeners... e.g. "dance music"'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -545,7 +545,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
         </div>
         <div className="top-actions">
           <button className="collab-btn ai-filter-btn" onClick={() => setShowAIFilter(true)}>
-            🤖 AI Filter
+            🤖 Filter
           </button>
           <div className="friends-dropdown-container">
             <button
