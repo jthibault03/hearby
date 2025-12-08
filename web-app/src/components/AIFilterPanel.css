@@ -126,9 +126,9 @@
 }
 
 .genre-tab.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #1db954;
   border-color: transparent;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(29, 185, 84, 0.4);
 }
 
 .sentiment-controls {
@@ -249,15 +249,16 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  color: #1db954;
 }
 
 .friend-badge {
-  background: linear-gradient(135deg, #1db954 0%, #1ed760 100%);
-  color: white;
-  padding: 2px 8px;
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 2px 6px;
+  border-radius: 999px;
   font-size: 0.65rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .card-sentiment {

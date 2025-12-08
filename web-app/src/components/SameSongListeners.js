@@ -7,11 +7,16 @@ function SameSongListeners({ listeners, currentTrack, onClose }) {
 
   if (!currentTrack) return null;
 
-  const sameSongListeners = listeners.filter(
-    (listener) =>
+  const sameSongListeners = (listeners || []).filter((listener) => {
+    if (!listener || !listener.track) return false;
+    if (!listener.track.name || !listener.track.artist) return false;
+    if (!currentTrack.name || !currentTrack.artist) return false;
+
+    return (
       listener.track.name === currentTrack.name &&
       listener.track.artist === currentTrack.artist
-  );
+    );
+  });
 
   const handleUserClick = (listener) => {
     setSelectedUser(listener);
@@ -24,10 +29,7 @@ function SameSongListeners({ listeners, currentTrack, onClose }) {
   return (
     <>
       <div className="same-song-overlay" onClick={onClose}>
-        <div
-          className="same-song-modal"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <div className="same-song-modal" onClick={(e) => e.stopPropagation()}>
           <div className="same-song-header">
             <h2>🎵 Listening to the same song</h2>
             <button className="close-btn" onClick={onClose}>
