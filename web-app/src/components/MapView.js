@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -77,6 +77,18 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
   const [showAIFilter, setShowAIFilter] = useState(false);
   const [showSameSong, setShowSameSong] = useState(false);
   const [visibleListeners, setVisibleListeners] = useState(MOCK_LISTENERS);
+  // `baseVisibleListeners` is the set determined purely by map bounds (no query applied).
+  // `visibleListeners` is what we actually show (base + optional query filter applied).
+  const [baseVisibleListeners, setBaseVisibleListeners] = useState(MOCK_LISTENERS);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  // keep a ref of the latest searchQuery so map event handlers (which are
+  // registered once) can read the current value without needing to re-bind.
+  const searchQueryRef = useRef(searchQuery);
+
+  useEffect(() => {
+    searchQueryRef.current = searchQuery;
+  }, [searchQuery]);
 
   useEffect(() => {
     locationManager
@@ -157,7 +169,22 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
           listener.location.longitude,
         ])
       );
-      setVisibleListeners(inView);
+      // update the base viewport set
+      setBaseVisibleListeners(inView);
+
+      // If there's an active query, re-run the query against the new in-view set.
+      if (searchQueryRef.current && searchQueryRef.current.trim()) {
+        // apply same search flow used elsewhere (makes a network call or local fallback)
+        applyQuery(searchQueryRef.current.trim(), inView)
+          .then((result) => {
+            if (Array.isArray(result)) setVisibleListeners(result);
+            else setVisibleListeners(inView);
+          })
+          .catch(() => setVisibleListeners(inView));
+      } else {
+        // no active query -> show base viewport listeners
+        setVisibleListeners(inView);
+      }
     };
 
     updateVisibleListeners();
@@ -170,6 +197,240 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
       map.off("zoomend", updateVisibleListeners);
     };
   }, [map]);
+
+  // Helper: apply a textual query to a provided set of listeners (`songSet`).
+  // Returns a Promise resolving to an array of listeners (possibly empty).
+  const applyQuery = async (q, songSet) => {
+    if (!q) return songSet;
+    setIsSearching(true);
+    try {
+      const res = await fetch("https://noggin.rea.gent/misleading-dingo-2120", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:
+            "Bearer rg_v1_zo51iagt405uj11irsolxk3h7xscji06aruq_ngk",
+        },
+        body: JSON.stringify({ songData: songSet, query: q }),
+      });
+
+      const text = await res.text();
+      try {
+        const parsed = JSON.parse(text);
+
+        let newListeners = [];
+        if (Array.isArray(parsed)) newListeners = parsed;
+        else if (Array.isArray(parsed.listeners)) newListeners = parsed.listeners;
+        else if (Array.isArray(parsed.viewableListeners)) newListeners = parsed.viewableListeners;
+        else if (Array.isArray(parsed.data)) newListeners = parsed.data;
+
+        if (newListeners.length > 0) return newListeners;
+        // else fallthrough to local fallback
+      } catch (e) {
+        // JSON parse failed — fallthrough to local fallback
+      }
+
+      // Local fallback search limited to `songSet` (so results remain in the viewport)
+      const fallback = (function localSearch(query, scope) {
+        const qWords = query
+          .toLowerCase()
+          .split(/\s+/)
+          .filter(Boolean);
+
+        const yearMatch = query.match(/\b(19|20)\d{2}\b/);
+        const decadeMatch = query.match(/\b(19|20)\d0s\b/);
+        const targetYear = yearMatch ? Number(yearMatch[0]) : null;
+        const decadeStart = decadeMatch ? Number(decadeMatch[0].slice(0,3) + '0') : null;
+
+        return (scope || []).filter((listener) => {
+          const track = songData[listener.trackId];
+          if (!track) return false;
+
+          if (targetYear && typeof track.year === 'number') {
+            if (track.year === targetYear) return true;
+          }
+          if (decadeStart && typeof track.year === 'number') {
+            if (track.year >= decadeStart && track.year < decadeStart + 10) return true;
+          }
+
+          const textParts = [
+            track.name,
+            Array.isArray(track.artist) ? track.artist.join(' ') : track.artist,
+            track.album,
+            (track.genres || []).join(' '),
+            (track.moodTags || []).join(' '),
+            track.kaggleRaw?.track_genre,
+          ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+
+          return qWords.every((w) => textParts.includes(w));
+        });
+      })(q, songSet);
+
+      return fallback;
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // When the user types a query, call the Noggin endpoint with the current
+  // visible listeners and the query. Noggin should return a pruned array of
+  // listeners which becomes the new visible set on the map and panels.
+  useEffect(() => {
+    let cancelled = false;
+    const q = searchQuery.trim();
+
+    // If query is empty, refresh visible listeners based on current map bounds
+    if (!q) {
+      if (!map) {
+        setVisibleListeners(MOCK_LISTENERS);
+        return;
+      }
+
+      const bounds = map.getBounds();
+      const center = bounds.getCenter();
+      const minimumBounds = center.toBounds(MIN_SEARCH_RADIUS_METERS);
+      const searchBounds = L.latLngBounds(
+        bounds.getSouthWest(),
+        bounds.getNorthEast()
+      ).extend(minimumBounds);
+
+      const inView = MOCK_LISTENERS.filter((listener) =>
+        searchBounds.contains([
+          listener.location.latitude,
+          listener.location.longitude,
+        ])
+      );
+      setVisibleListeners(inView);
+      return;
+    }
+
+    setIsSearching(true);
+
+    fetch("https://noggin.rea.gent/misleading-dingo-2120", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization:
+          "Bearer rg_v1_zo51iagt405uj11irsolxk3h7xscji06aruq_ngk",
+      },
+      body: JSON.stringify({ songData: visibleListeners, query: q }),
+    })
+      .then((res) => res.text())
+      .then((text) => {
+        if (cancelled) return;
+        try {
+          const parsed = JSON.parse(text);
+
+          let newListeners = [];
+          if (Array.isArray(parsed)) newListeners = parsed;
+          else if (Array.isArray(parsed.listeners)) newListeners = parsed.listeners;
+          else if (Array.isArray(parsed.viewableListeners)) newListeners = parsed.viewableListeners;
+          else if (Array.isArray(parsed.data)) newListeners = parsed.data;
+
+          if (newListeners.length > 0) {
+            setVisibleListeners(newListeners);
+            console.debug("Noggin returned", newListeners.length, "listeners");
+          } else {
+            // Noggin returned no matches — fall back to a quick local filter
+            console.debug("Noggin returned no listeners, falling back to local filter for query:", q);
+            const fallback = (function localSearch(query) {
+              const qWords = query
+                .toLowerCase()
+                .split(/\s+/)
+                .filter(Boolean);
+
+              // handle explicit year match
+              const yearMatch = query.match(/\b(19|20)\d{2}\b/);
+              const decadeMatch = query.match(/\b(19|20)\d0s\b/);
+              const targetYear = yearMatch ? Number(yearMatch[0]) : null;
+              const decadeStart = decadeMatch ? Number(decadeMatch[0].slice(0,3) + '0') : null;
+
+              return MOCK_LISTENERS.filter((listener) => {
+                const track = songData[listener.trackId];
+                if (!track) return false;
+
+                if (targetYear && typeof track.year === 'number') {
+                  if (track.year === targetYear) return true;
+                }
+                if (decadeStart && typeof track.year === 'number') {
+                  if (track.year >= decadeStart && track.year < decadeStart + 10) return true;
+                }
+
+                const textParts = [
+                  track.name,
+                  Array.isArray(track.artist) ? track.artist.join(' ') : track.artist,
+                  track.album,
+                  (track.genres || []).join(' '),
+                  (track.moodTags || []).join(' '),
+                  track.kaggleRaw?.track_genre,
+                ]
+                  .filter(Boolean)
+                  .join(' ')
+                  .toLowerCase();
+
+                // require all words to appear somewhere
+                return qWords.every((w) => textParts.includes(w));
+              });
+            })(q);
+
+            setVisibleListeners(fallback);
+          }
+        } catch (e) {
+          console.error("Failed to parse noggin response", e);
+          // Parsing failed — fallback to local search
+          const fallback = (function localSearch(query) {
+            const qWords = query
+              .toLowerCase()
+              .split(/\s+/)
+              .filter(Boolean);
+
+            const yearMatch = query.match(/\b(19|20)\d{2}\b/);
+            const decadeMatch = query.match(/\b(19|20)\d0s\b/);
+            const targetYear = yearMatch ? Number(yearMatch[0]) : null;
+            const decadeStart = decadeMatch ? Number(decadeMatch[0].slice(0,3) + '0') : null;
+
+            return MOCK_LISTENERS.filter((listener) => {
+              const track = songData[listener.trackId];
+              if (!track) return false;
+
+              if (targetYear && typeof track.year === 'number') {
+                if (track.year === targetYear) return true;
+              }
+              if (decadeStart && typeof track.year === 'number') {
+                if (track.year >= decadeStart && track.year < decadeStart + 10) return true;
+              }
+
+              const textParts = [
+                track.name,
+                Array.isArray(track.artist) ? track.artist.join(' ') : track.artist,
+                track.album,
+                (track.genres || []).join(' '),
+                (track.moodTags || []).join(' '),
+                track.kaggleRaw?.track_genre,
+              ]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+
+              return qWords.every((w) => textParts.includes(w));
+            });
+          })(q);
+
+          setVisibleListeners(fallback);
+        }
+      })
+      .catch((err) => console.error("Noggin request failed", err))
+      .finally(() => {
+        if (!cancelled) setIsSearching(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchQuery]);
 
   return (
     <div className="map-view">
@@ -209,7 +470,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
           </Marker>
         )}
 
-        {MOCK_LISTENERS.map((listener) => {
+        {visibleListeners.map((listener) => {
           const track = songData[listener.trackId];
           const position = listener.isFriend
             ? [listener.location.latitude, listener.location.longitude]
@@ -260,11 +521,31 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
         })}
       </MapContainer>
 
-      <div className="top-bar">
+        <div className="top-bar">
         <h1 className="app-title">Hearby</h1>
+        <div className="search-wrapper">
+          <input
+            className="search-input"
+            type="text"
+            placeholder='Search vibes… e.g. "sunday vibes" or "music from 1985"'
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              className="search-clear-btn"
+              title="Clear search"
+              onClick={() => setSearchQuery("")}
+            >
+              ×
+            </button>
+          )}
+          {isSearching && <span className="search-status">Thinking…</span>}
+        </div>
         <div className="top-actions">
-          <button className="collab-btn" onClick={() => setShowAIFilter(true)}>
-            AI Filter
+          <button className="collab-btn ai-filter-btn" onClick={() => setShowAIFilter(true)}>
+            🤖 AI Filter
           </button>
           <div className="friends-dropdown-container">
             <button
@@ -366,7 +647,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
 
       {showAIFilter && (
         <AIFilterPanel
-          listeners={MOCK_LISTENERS}
+          listeners={visibleListeners}
           onClose={() => setShowAIFilter(false)}
           onTrackSelect={handleTrackSelect}
         />
@@ -374,7 +655,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
 
       {showSameSong && (
         <SameSongListeners
-          listeners={MOCK_LISTENERS}
+          listeners={visibleListeners}
           currentTrack={currentTrack}
           onClose={() => setShowSameSong(false)}
         />

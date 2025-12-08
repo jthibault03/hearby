@@ -202,6 +202,124 @@
   transform: translateY(-1px);
 }
 
+/* AI Filter button : matches collab-btn but with a subtle gradient accent */
+.ai-filter-btn {
+  background: linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.06));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: white;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-weight: 700;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ai-filter-btn:hover {
+  background: linear-gradient(90deg, rgba(255,255,255,0.14), rgba(255,255,255,0.08)); 
+
+}
+
+/* Search input in the top bar: match visual weight of buttons */
+.search-input {
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  width: 360px;
+  max-width: 40vw;
+  outline: none;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 12px rgba(2,6,23,0.12);
+}
+
+.search-input::placeholder {
+  color: rgba(255,255,255,0.6);
+}
+
+.search-input:focus {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.22);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .search-input {
+    width: 180px;
+    max-width: 50vw;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Clear button that appears next to the search input */
+.search-clear-btn {
+  background: rgba(255,255,255,0.06);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.12);
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  transition: background 0.15s, transform 0.12s, box-shadow 0.12s;
+}
+
+.search-clear-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  /* keep the vertical centering (-50%) and add a small upward lift (-2px)
+     so the button 'pops up' without losing its centered alignment */
+  transform: translateY(calc(-50% - 2px));
+  box-shadow: 0 6px 16px rgba(2,6,23,0.16);
+}
+
+.search-clear-btn:active {
+  /* on click, stay centered (no extra lift) to avoid jump */
+  transform: translateY(-50%);
+}
+
+.search-status {
+  color: rgba(255,255,255,0.7);
+  font-size: 0.85rem;
+  margin-left: 6px;
+}
+
+/* Position the clear button inside the input on the right */
+.search-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.search-input {
+  padding-right: 48px; /* room for the clear button */
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+@media (max-width: 768px) {
+  .search-input { padding-right: 40px; }
+  .search-clear-btn { right: 4px; width: 30px; height: 30px; }
+}
+
 .settings-btn {
   background: none;
   border: none;
