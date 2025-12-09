@@ -6,7 +6,12 @@ import "leaflet.heat";
 import "./MapView.css";
 import locationManager from "../services/LocationManager";
 import spotifyManager from "../services/SpotifyManager";
-import { MOCK_LISTENERS, MOCK_FRIENDS, MOCK_USER } from "../services/mockData";
+import {
+  MOCK_LISTENERS,
+  MOCK_FRIENDS,
+  MOCK_USER,
+  simulateListenerMovement,
+} from "../services/mockData";
 import songData from "../services/mockSongData.generated.json";
 import CurrentTrack from "./CurrentTrack";
 import ListenersPanel from "./ListenersPanel";
@@ -76,19 +81,21 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showAIFilter, setShowAIFilter] = useState(false);
   const [showSameSong, setShowSameSong] = useState(false);
+  const [allListeners, setAllListeners] = useState(MOCK_LISTENERS);
   const [visibleListeners, setVisibleListeners] = useState(MOCK_LISTENERS);
   // `baseVisibleListeners` is the set determined purely by map bounds (no query applied).
   // `visibleListeners` is what we actually show (base + optional query filter applied).
   const [baseVisibleListeners, setBaseVisibleListeners] = useState(MOCK_LISTENERS);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  const [simulatedTick, setSimulatedTick] = useState(0);
   // keep a ref of the latest searchQuery so map event handlers (which are
   // registered once) can read the current value without needing to re-bind.
   const searchQueryRef = useRef(searchQuery);
 
   useEffect(() => {
     searchQueryRef.current = searchQuery;
-  }, [searchQuery]);
+  }, [searchQuery, allListeners, map]);
 
   useEffect(() => {
     locationManager
@@ -113,6 +120,11 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying);
+  };
+
+  const handleSimulateTime = () => {
+    setSimulatedTick((t) => t + 1);
+    setAllListeners((prev) => simulateListenerMovement(prev));
   };
 
   const filteredFriends = MOCK_FRIENDS.filter(
@@ -152,7 +164,11 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
   }, [visibleListeners]);
 
   useEffect(() => {
-    if (!map) return;
+    if (!map) {
+      setBaseVisibleListeners(allListeners);
+      setVisibleListeners(allListeners);
+      return;
+    }
 
     const updateVisibleListeners = () => {
       const bounds = map.getBounds();
@@ -163,7 +179,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
         bounds.getNorthEast()
       ).extend(minimumBounds);
 
-      const inView = MOCK_LISTENERS.filter((listener) =>
+      const inView = allListeners.filter((listener) =>
         searchBounds.contains([
           listener.location.latitude,
           listener.location.longitude,
@@ -196,7 +212,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
       map.off("moveend", updateVisibleListeners);
       map.off("zoomend", updateVisibleListeners);
     };
-  }, [map]);
+  }, [map, allListeners]);
 
   // Helper: apply a textual query to a provided set of listeners (`songSet`).
   // Returns a Promise resolving to an array of listeners (possibly empty).
@@ -285,7 +301,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
     // If query is empty, refresh visible listeners based on current map bounds
     if (!q) {
       if (!map) {
-        setVisibleListeners(MOCK_LISTENERS);
+        setVisibleListeners(allListeners);
         return;
       }
 
@@ -297,7 +313,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
         bounds.getNorthEast()
       ).extend(minimumBounds);
 
-      const inView = MOCK_LISTENERS.filter((listener) =>
+      const inView = allListeners.filter((listener) =>
         searchBounds.contains([
           listener.location.latitude,
           listener.location.longitude,
@@ -348,7 +364,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
               const targetYear = yearMatch ? Number(yearMatch[0]) : null;
               const decadeStart = decadeMatch ? Number(decadeMatch[0].slice(0,3) + '0') : null;
 
-              return MOCK_LISTENERS.filter((listener) => {
+              return allListeners.filter((listener) => {
                 const track = songData[listener.trackId];
                 if (!track) return false;
 
@@ -392,7 +408,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
             const targetYear = yearMatch ? Number(yearMatch[0]) : null;
             const decadeStart = decadeMatch ? Number(decadeMatch[0].slice(0,3) + '0') : null;
 
-            return MOCK_LISTENERS.filter((listener) => {
+            return allListeners.filter((listener) => {
               const track = songData[listener.trackId];
               if (!track) return false;
 
@@ -437,6 +453,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
       <MapContainer
         center={mapCenter}
         zoom={14}
+        maxZoom={17}
         className="map-container"
         zoomControl={false}
         ref={setMap}
@@ -444,6 +461,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
         <TileLayer
           attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+          maxZoom={17}
         />
 
         <HeatmapLayer
@@ -531,11 +549,11 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          {searchQuery && (
-            <button
-              type="button"
-              className="search-clear-btn"
-              title="Clear search"
+        {searchQuery && (
+          <button
+            type="button"
+            className="search-clear-btn"
+            title="Clear search"
               onClick={() => setSearchQuery("")}
             >
               ×
@@ -544,6 +562,13 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
           {isSearching && <span className="search-status">Thinking…</span>}
         </div>
         <div className="top-actions">
+          <button
+            className="collab-btn"
+            onClick={handleSimulateTime}
+            title="Nudge everyone forward in time and move their positions"
+          >
+            Simulate Time{simulatedTick > 0 ? ` (${simulatedTick})` : ""}
+          </button>
           <button className="collab-btn ai-filter-btn" onClick={() => setShowAIFilter(true)}>
             🤖 Filter
           </button>

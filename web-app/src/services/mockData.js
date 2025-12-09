@@ -23,6 +23,57 @@ const CAMPUS_LNG_RADIUS = 0.03;  // ~1 mile east/west
 const CITY_LAT_RADIUS = 0.0725; 
 const CITY_LNG_RADIUS = 0.0537;  
 
+// Helpers for lightweight movement simulation
+const METERS_PER_DEG_LAT = 111_320;
+const metersToLngDegrees = (meters, atLat) =>
+  meters / (METERS_PER_DEG_LAT * Math.cos((atLat * Math.PI) / 180) || 1);
+
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+/**
+ * Simulates a short time step by nudging each listener within its cluster.
+ * Keeps Berkeley listeners around campus and SF listeners around the SF cluster.
+ */
+export function simulateListenerMovement(listeners, minutes = 15) {
+  const driftMeters = 100 * (minutes / 15);
+
+  return (listeners || []).map((listener) => {
+    const { latitude = BASE_LAT, longitude = BASE_LNG, city } = listener.location || {};
+
+    const isBerkeley = city === "Berkeley";
+    const isSF = city === "San Francisco";
+
+    const baseLat = isBerkeley ? BASE_LAT : isSF ? SF_LAT : latitude;
+    const baseLng = isBerkeley ? BASE_LNG : isSF ? SF_LNG : longitude;
+    const latRadius = isBerkeley
+      ? CAMPUS_LAT_RADIUS
+      : isSF
+      ? CITY_LAT_RADIUS
+      : 0.02;
+    const lngRadius = isBerkeley
+      ? CAMPUS_LNG_RADIUS
+      : isSF
+      ? CITY_LNG_RADIUS
+      : 0.02;
+
+    const latJitter = (Math.random() - 0.5) * 2 * (driftMeters / METERS_PER_DEG_LAT);
+    const lngJitter =
+      (Math.random() - 0.5) * 2 * metersToLngDegrees(driftMeters, baseLat);
+
+    const nextLat = clamp(baseLat + (latitude - baseLat) + latJitter, baseLat - latRadius, baseLat + latRadius);
+    const nextLng = clamp(baseLng + (longitude - baseLng) + lngJitter, baseLng - lngRadius, baseLng + lngRadius);
+
+    return {
+      ...listener,
+      location: {
+        ...listener.location,
+        latitude: nextLat,
+        longitude: nextLng,
+      },
+    };
+  });
+}
+
 
 
 // Hand-authored listeners (friends + a few nearby people)
