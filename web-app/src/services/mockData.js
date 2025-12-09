@@ -35,7 +35,7 @@ const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
  * Keeps Berkeley listeners around campus and SF listeners around the SF cluster.
  */
 export function simulateListenerMovement(listeners, minutes = 15) {
-  const driftMeters = 100 * (minutes / 15); // ~25m per step by default
+  const driftMeters = 100 * (minutes / 15);
 
   return (listeners || []).map((listener) => {
     const { latitude = BASE_LAT, longitude = BASE_LNG, city } = listener.location || {};
