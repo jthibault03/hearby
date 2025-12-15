@@ -14,6 +14,10 @@ function CollabBoothScreen({ boothId, onBack }) {
   const [messages, setMessages] = useState(MOCK_MESSAGES);
   const [chatInput, setChatInput] = useState("");
   const chatEndRef = useRef(null);
+  const boothInitializedRef = useRef(null);
+
+  const makeTimestamp = () =>
+    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   const booth = useMemo(() => {
     const booths = boothManager.getAllBooths();
@@ -36,6 +40,23 @@ function CollabBoothScreen({ boothId, onBack }) {
     }
   }, [boothId, onBack]);
 
+  useEffect(() => {
+    if (!booth) return;
+    // Only run initialization logic when the booth changes.
+    if (boothInitializedRef.current === booth.id) return;
+    boothInitializedRef.current = booth.id;
+
+    // If this is a newly created booth (created by the current user with only them inside), start with an empty chat.
+    if (
+      booth.creator === boothManager.currentUser?.id &&
+      (booth.members?.length ?? 0) === 1
+    ) {
+      setMessages([]);
+    } else {
+      setMessages(MOCK_MESSAGES);
+    }
+  }, [booth]);
+
   if (!booth) {
     return (
       <div className="collab-booth-screen">
@@ -57,10 +78,35 @@ function CollabBoothScreen({ boothId, onBack }) {
       id: Date.now(),
       author: "You",
       text: trimmed,
-      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      timestamp: makeTimestamp(),
     };
     setMessages((prev) => [...prev, newMessage]);
     setChatInput("");
+  };
+
+  const handlePollVote = (messageId, option) => {
+    setMessages((prev) =>
+      prev.map((msg) => {
+        if (msg.id !== messageId || msg.type !== "poll") return msg;
+        const counts = msg.pollCounts || { yes: 0, no: 0 };
+        return {
+          ...msg,
+          pollCounts: { ...counts, [option]: counts[option] + 1 },
+        };
+      })
+    );
+  };
+
+  const handleSuggestSkip = () => {
+    const pollMessage = {
+      id: `poll-${Date.now()}`,
+      author: boothManager.currentUser?.displayName || "You",
+      text: `Skip "${booth?.currentTrack?.name || "this track"}"?`,
+      timestamp: makeTimestamp(),
+      type: "poll",
+      pollCounts: { yes: 0, no: 0 },
+    };
+    setMessages((prev) => [...prev, pollMessage]);
   };
 
   return (
@@ -98,18 +144,44 @@ function CollabBoothScreen({ boothId, onBack }) {
           </div>
 
           <div className="chat-window">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`chat-message ${msg.author === "You" ? "self" : ""}`}
-              >
-                <div className="chat-author">
-                  <span>{msg.author}</span>
-                  <span className="chat-time">{msg.timestamp}</span>
+            {messages.map((msg) => {
+              const isSelf = msg.author === "You";
+              const isPoll = msg.type === "poll";
+              return (
+                <div
+                  key={msg.id}
+                  className={`chat-message ${isSelf ? "self" : ""} ${
+                    isPoll ? "poll" : ""
+                  }`}
+                >
+                  <div className="chat-author">
+                    <span>{msg.author}</span>
+                    <span className="chat-time">{msg.timestamp}</span>
+                  </div>
+                  {isPoll ? (
+                    <div className="chat-bubble poll-bubble">
+                      <div className="poll-question">{msg.text}</div>
+                      <div className="poll-actions">
+                        <button
+                          type="button"
+                          onClick={() => handlePollVote(msg.id, "yes")}
+                        >
+                          👍 Yes ({msg.pollCounts?.yes ?? 0})
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handlePollVote(msg.id, "no")}
+                        >
+                          👎 No ({msg.pollCounts?.no ?? 0})
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="chat-bubble">{msg.text}</div>
+                  )}
                 </div>
-                <div className="chat-bubble">{msg.text}</div>
-              </div>
-            ))}
+              );
+            })}
             <div ref={chatEndRef} />
           </div>
 
@@ -147,7 +219,9 @@ function CollabBoothScreen({ boothId, onBack }) {
               )}
               <div className="track-actions">
                 <button className="ghost-btn">Suggest Change</button>
-                <button className="ghost-btn danger">Suggest Skip</button>
+                <button className="ghost-btn danger" onClick={handleSuggestSkip}>
+                  Suggest Skip
+                </button>
               </div>
             </div>
           </div>

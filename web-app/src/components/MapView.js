@@ -101,6 +101,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
     locationManager
       .requestLocation()
       .then((loc) => {
+        console.log(loc);
         setUserLocation(loc);
         setMapCenter([loc.latitude, loc.longitude]);
       })

@@ -175,6 +175,7 @@
 }
 
 .chat-window {
+  height: 55vh; /* fixed viewport for chat, stays consistent even when empty */
   max-height: 55vh;
   overflow-y: auto;
   display: flex;
@@ -213,6 +214,35 @@
 
 .chat-message.self .chat-bubble {
   background: #1c1c1c;
+}
+
+.chat-message.poll .chat-bubble {
+  background: #1c1c1c;
+  border-color: #555;
+}
+
+.poll-bubble {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.poll-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.poll-actions button {
+  background: #282828;
+  border: 1px solid #404040;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.poll-actions button:hover {
+  background: #333;
 }
 
 .chat-time {
