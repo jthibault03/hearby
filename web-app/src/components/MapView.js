@@ -71,10 +71,47 @@ const createAlbumIcon = (albumArtUrl, isFriend) => {
 
 const DEFAULT_CENTER = [37.8715, -122.273];
 
+const MAP_VIEW_STORAGE_KEY = "mapView:lastView";
+
+const loadStoredView = () => {
+  try {
+    const raw = localStorage.getItem(MAP_VIEW_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const { center, zoom } = parsed || {};
+    if (Array.isArray(center) && center.length === 2) {
+      return {
+        center,
+        zoom: typeof zoom === "number" ? zoom : null,
+      };
+    }
+  } catch (e) {
+    // ignore parse errors and fall back to default
+  }
+  return null;
+};
+
+const persistView = (coords, zoom) => {
+  try {
+    localStorage.setItem(
+      MAP_VIEW_STORAGE_KEY,
+      JSON.stringify({ center: coords, zoom })
+    );
+  } catch (e) {
+    // ignore write failures
+  }
+};
+
 function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
   const [userLocation, setUserLocation] = useState(null);
   const [currentTrack, setCurrentTrack] = useState(null);
-  const [mapCenter, setMapCenter] = useState(DEFAULT_CENTER);
+  const initialStoredView = useRef(loadStoredView());
+  const [mapCenter, setMapCenter] = useState(
+    () => initialStoredView.current?.center || DEFAULT_CENTER
+  );
+  const [mapZoom, setMapZoom] = useState(
+    () => initialStoredView.current?.zoom || 14
+  );
   const [showFriends, setShowFriends] = useState(false);
   const [friendSearch, setFriendSearch] = useState("");
   const [map, setMap] = useState(null);
@@ -103,16 +140,29 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
       .then((loc) => {
         console.log(loc);
         setUserLocation(loc);
-        setMapCenter([loc.latitude, loc.longitude]);
+        // Only override the center if we didn't already restore a saved value.
+        if (!initialStoredView.current?.center) {
+          const coords = [loc.latitude, loc.longitude];
+          setMapCenter(coords);
+          persistView(coords, mapZoom);
+        }
       })
       .catch(() => {
-        setMapCenter(DEFAULT_CENTER);
+        if (!initialStoredView.current?.center) {
+          setMapCenter(DEFAULT_CENTER);
+          persistView(DEFAULT_CENTER, mapZoom);
+        }
       });
 
     spotifyManager.getCurrentlyPlaying().then((track) => {
       setCurrentTrack(track);
     });
   }, []);
+
+  // Persist map center whenever it changes.
+  useEffect(() => {
+    persistView(mapCenter, mapZoom);
+  }, [mapCenter, mapZoom]);
 
   const handleTrackSelect = (track) => {
     setCurrentTrack(track);
@@ -214,6 +264,27 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
       map.off("zoomend", updateVisibleListeners);
     };
   }, [map, allListeners]);
+
+  // Keep stored center in sync with actual map position.
+  useEffect(() => {
+    if (!map) return;
+    const handleCenterChange = () => {
+      const center = map.getCenter();
+      const zoom = map.getZoom();
+      const coords = [center.lat, center.lng];
+      setMapCenter(coords);
+      setMapZoom(zoom);
+      persistView(coords, zoom);
+    };
+
+    map.on("moveend", handleCenterChange);
+    map.on("zoomend", handleCenterChange);
+
+    return () => {
+      map.off("moveend", handleCenterChange);
+      map.off("zoomend", handleCenterChange);
+    };
+  }, [map]);
 
   const localSearch = (query, scope = allListeners) => {
     const qWords = query
@@ -381,7 +452,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
     <div className="map-view">
       <MapContainer
         center={mapCenter}
-        zoom={14}
+        zoom={mapZoom}
         maxZoom={17}
         className="map-container"
         zoomControl={false}
