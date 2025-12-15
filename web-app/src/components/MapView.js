@@ -214,6 +214,46 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
     };
   }, [map, allListeners]);
 
+  const localSearch = (query, scope = allListeners) => {
+    const qWords = query
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean);
+
+    // handle explicit year match
+    const yearMatch = query.match(/\b(19|20)\d{2}\b/);
+    const decadeMatch = query.match(/\b(19|20)\d0s\b/);
+    const targetYear = yearMatch ? Number(yearMatch[0]) : null;
+    const decadeStart = decadeMatch ? Number(decadeMatch[0].slice(0, 3) + '0') : null;
+
+    return scope.filter((listener) => {
+      const track = songData[listener.trackId];
+      if (!track) return false;
+
+      if (targetYear && typeof track.year === 'number') {
+        if (track.year === targetYear) return true;
+      }
+      if (decadeStart && typeof track.year === 'number') {
+        if (track.year >= decadeStart && track.year < decadeStart + 10) return true;
+      }
+
+      const textParts = [
+        track.name,
+        Array.isArray(track.artist) ? track.artist.join(' ') : track.artist,
+        track.album,
+        (track.genres || []).join(' '),
+        (track.moodTags || []).join(' '),
+        track.kaggleRaw?.track_genre,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      // require all words to appear somewhere
+      return qWords.every((w) => textParts.includes(w));
+    });
+  };
+
   // Helper: apply a textual query to a provided set of listeners (`songSet`).
   // Returns a Promise resolving to an array of listeners (possibly empty).
   const applyQuery = async (q, songSet) => {
@@ -247,88 +287,12 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
       }
 
       // Local fallback search limited to `songSet` (so results remain in the viewport)
-      const fallback = (function localSearch(query, scope) {
-        const qWords = query
-          .toLowerCase()
-          .split(/\s+/)
-          .filter(Boolean);
-
-        const yearMatch = query.match(/\b(19|20)\d{2}\b/);
-        const decadeMatch = query.match(/\b(19|20)\d0s\b/);
-        const targetYear = yearMatch ? Number(yearMatch[0]) : null;
-        const decadeStart = decadeMatch ? Number(decadeMatch[0].slice(0,3) + '0') : null;
-
-        return (scope || []).filter((listener) => {
-          const track = songData[listener.trackId];
-          if (!track) return false;
-
-          if (targetYear && typeof track.year === 'number') {
-            if (track.year === targetYear) return true;
-          }
-          if (decadeStart && typeof track.year === 'number') {
-            if (track.year >= decadeStart && track.year < decadeStart + 10) return true;
-          }
-
-          const textParts = [
-            track.name,
-            Array.isArray(track.artist) ? track.artist.join(' ') : track.artist,
-            track.album,
-            (track.genres || []).join(' '),
-            (track.moodTags || []).join(' '),
-            track.kaggleRaw?.track_genre,
-          ]
-            .filter(Boolean)
-            .join(' ')
-            .toLowerCase();
-
-          return qWords.every((w) => textParts.includes(w));
-        });
-      })(q, songSet);
+      const fallback = localSearch(q, songSet);
 
       return fallback;
     } finally {
       setIsSearching(false);
     }
-  };
-
-  const localSearch = (query) => {
-    const qWords = query
-      .toLowerCase()
-      .split(/\s+/)
-      .filter(Boolean);
-
-    // handle explicit year match
-    const yearMatch = query.match(/\b(19|20)\d{2}\b/);
-    const decadeMatch = query.match(/\b(19|20)\d0s\b/);
-    const targetYear = yearMatch ? Number(yearMatch[0]) : null;
-    const decadeStart = decadeMatch ? Number(decadeMatch[0].slice(0, 3) + '0') : null;
-
-    return allListeners.filter((listener) => {
-      const track = songData[listener.trackId];
-      if (!track) return false;
-
-      if (targetYear && typeof track.year === 'number') {
-        if (track.year === targetYear) return true;
-      }
-      if (decadeStart && typeof track.year === 'number') {
-        if (track.year >= decadeStart && track.year < decadeStart + 10) return true;
-      }
-
-      const textParts = [
-        track.name,
-        Array.isArray(track.artist) ? track.artist.join(' ') : track.artist,
-        track.album,
-        (track.genres || []).join(' '),
-        (track.moodTags || []).join(' '),
-        track.kaggleRaw?.track_genre,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-
-      // require all words to appear somewhere
-      return qWords.every((w) => textParts.includes(w));
-    });
   };
 
   // When the user types a query, call the Noggin endpoint with the current
