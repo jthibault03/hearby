@@ -54,20 +54,20 @@ const createAlbumIcon = (albumArtUrl, isFriend) => {
   });
 };
 
-const FEATURED_CITY_CLUSTERS = [
-  { name: "Berkeley", lat: 37.8715, lng: -122.273, baseIntensity: 0.9 },
-  { name: "San Francisco", lat: 37.7749, lng: -122.4194, baseIntensity: 0.85 },
-  { name: "Oakland", lat: 37.8044, lng: -122.2711, baseIntensity: 0.8 },
-  { name: "San Jose", lat: 37.3382, lng: -121.8863, baseIntensity: 0.75 },
-  { name: "Los Angeles", lat: 34.0522, lng: -118.2437, baseIntensity: 0.85 },
-  { name: "Sacramento", lat: 38.5816, lng: -121.4944, baseIntensity: 0.7 },
-  { name: "Seattle", lat: 47.6062, lng: -122.3321, baseIntensity: 0.7 },
-  { name: "Portland", lat: 45.5152, lng: -122.6784, baseIntensity: 0.65 },
-  { name: "New York", lat: 40.7128, lng: -74.006, baseIntensity: 0.9 },
-  { name: "Chicago", lat: 41.8781, lng: -87.6298, baseIntensity: 0.8 },
-  { name: "Atlanta", lat: 33.749, lng: -84.388, baseIntensity: 0.75 },
-  { name: "Houston", lat: 29.7604, lng: -95.3698, baseIntensity: 0.75 },
-];
+// const FEATURED_CITY_CLUSTERS = [
+//   { name: "Berkeley", lat: 37.8715, lng: -122.273, baseIntensity: 0.9 },
+//   { name: "San Francisco", lat: 37.7749, lng: -122.4194, baseIntensity: 0.85 },
+//   { name: "Oakland", lat: 37.8044, lng: -122.2711, baseIntensity: 0.8 },
+//   { name: "San Jose", lat: 37.3382, lng: -121.8863, baseIntensity: 0.75 },
+//   { name: "Los Angeles", lat: 34.0522, lng: -118.2437, baseIntensity: 0.85 },
+//   { name: "Sacramento", lat: 38.5816, lng: -121.4944, baseIntensity: 0.7 },
+//   { name: "Seattle", lat: 47.6062, lng: -122.3321, baseIntensity: 0.7 },
+//   { name: "Portland", lat: 45.5152, lng: -122.6784, baseIntensity: 0.65 },
+//   { name: "New York", lat: 40.7128, lng: -74.006, baseIntensity: 0.9 },
+//   { name: "Chicago", lat: 41.8781, lng: -87.6298, baseIntensity: 0.8 },
+//   { name: "Atlanta", lat: 33.749, lng: -84.388, baseIntensity: 0.75 },
+//   { name: "Houston", lat: 29.7604, lng: -95.3698, baseIntensity: 0.75 },
+// ];
 
 const DEFAULT_CENTER = [37.8715, -122.273];
 
@@ -291,6 +291,46 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
     }
   };
 
+  const localSearch = (query) => {
+    const qWords = query
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean);
+
+    // handle explicit year match
+    const yearMatch = query.match(/\b(19|20)\d{2}\b/);
+    const decadeMatch = query.match(/\b(19|20)\d0s\b/);
+    const targetYear = yearMatch ? Number(yearMatch[0]) : null;
+    const decadeStart = decadeMatch ? Number(decadeMatch[0].slice(0, 3) + '0') : null;
+
+    return allListeners.filter((listener) => {
+      const track = songData[listener.trackId];
+      if (!track) return false;
+
+      if (targetYear && typeof track.year === 'number') {
+        if (track.year === targetYear) return true;
+      }
+      if (decadeStart && typeof track.year === 'number') {
+        if (track.year >= decadeStart && track.year < decadeStart + 10) return true;
+      }
+
+      const textParts = [
+        track.name,
+        Array.isArray(track.artist) ? track.artist.join(' ') : track.artist,
+        track.album,
+        (track.genres || []).join(' '),
+        (track.moodTags || []).join(' '),
+        track.kaggleRaw?.track_genre,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      // require all words to appear somewhere
+      return qWords.every((w) => textParts.includes(w));
+    });
+  };
+
   // When the user types a query, call the Noggin endpoint with the current
   // visible listeners and the query. Noggin should return a pruned array of
   // listeners which becomes the new visible set on the map and panels.
@@ -352,89 +392,13 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
           } else {
             // Noggin returned no matches — fall back to a quick local filter
             console.debug("Noggin returned no listeners, falling back to local filter for query:", q);
-            const fallback = (function localSearch(query) {
-              const qWords = query
-                .toLowerCase()
-                .split(/\s+/)
-                .filter(Boolean);
-
-              // handle explicit year match
-              const yearMatch = query.match(/\b(19|20)\d{2}\b/);
-              const decadeMatch = query.match(/\b(19|20)\d0s\b/);
-              const targetYear = yearMatch ? Number(yearMatch[0]) : null;
-              const decadeStart = decadeMatch ? Number(decadeMatch[0].slice(0,3) + '0') : null;
-
-              return allListeners.filter((listener) => {
-                const track = songData[listener.trackId];
-                if (!track) return false;
-
-                if (targetYear && typeof track.year === 'number') {
-                  if (track.year === targetYear) return true;
-                }
-                if (decadeStart && typeof track.year === 'number') {
-                  if (track.year >= decadeStart && track.year < decadeStart + 10) return true;
-                }
-
-                const textParts = [
-                  track.name,
-                  Array.isArray(track.artist) ? track.artist.join(' ') : track.artist,
-                  track.album,
-                  (track.genres || []).join(' '),
-                  (track.moodTags || []).join(' '),
-                  track.kaggleRaw?.track_genre,
-                ]
-                  .filter(Boolean)
-                  .join(' ')
-                  .toLowerCase();
-
-                // require all words to appear somewhere
-                return qWords.every((w) => textParts.includes(w));
-              });
-            })(q);
-
+            const fallback = localSearch(q);
             setVisibleListeners(fallback);
           }
         } catch (e) {
-          console.error("Failed to parse noggin response", e);
           // Parsing failed — fallback to local search
-          const fallback = (function localSearch(query) {
-            const qWords = query
-              .toLowerCase()
-              .split(/\s+/)
-              .filter(Boolean);
-
-            const yearMatch = query.match(/\b(19|20)\d{2}\b/);
-            const decadeMatch = query.match(/\b(19|20)\d0s\b/);
-            const targetYear = yearMatch ? Number(yearMatch[0]) : null;
-            const decadeStart = decadeMatch ? Number(decadeMatch[0].slice(0,3) + '0') : null;
-
-            return allListeners.filter((listener) => {
-              const track = songData[listener.trackId];
-              if (!track) return false;
-
-              if (targetYear && typeof track.year === 'number') {
-                if (track.year === targetYear) return true;
-              }
-              if (decadeStart && typeof track.year === 'number') {
-                if (track.year >= decadeStart && track.year < decadeStart + 10) return true;
-              }
-
-              const textParts = [
-                track.name,
-                Array.isArray(track.artist) ? track.artist.join(' ') : track.artist,
-                track.album,
-                (track.genres || []).join(' '),
-                (track.moodTags || []).join(' '),
-                track.kaggleRaw?.track_genre,
-              ]
-                .filter(Boolean)
-                .join(' ')
-                .toLowerCase();
-
-              return qWords.every((w) => textParts.includes(w));
-            });
-          })(q);
-
+          console.error("Failed to parse noggin response", e);
+          const fallback = localSearch(q);
           setVisibleListeners(fallback);
         }
       })
