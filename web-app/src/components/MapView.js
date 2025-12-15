@@ -545,7 +545,7 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
           <input
             className="search-input"
             type="text"
-            placeholder='Search for listeners... e.g. "dance music"'
+            placeholder='Search for listeners... e.g. "pop music"'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
