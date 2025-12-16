@@ -47,7 +47,7 @@ then run:
 npm run generate:songs
 npm run enrich:songs
 ```
-The first command gets mock data from this kaggle dataset: https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset?resource=download, the second one uses Spotify api to enrich data with more information. The code for this is located in the `scripts` directory in case you want to see/change anything.
+The first command gets mock data from this kaggle dataset: https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset?resource=download, the second one uses Spotify api to enrich data with more information. The code for this is located in the `web-app/scripts` directory in case you want to see/change anything.
 
 
 ### Future Enhancements
