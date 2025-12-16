@@ -3,7 +3,7 @@ import "./ListenersPanel.css";
 import songData from "../services/mockSongData.generated.json";
 
 const ListenersPanel = ({ listeners, onTrackSelect }) => {
-  const [listHeight, setListHeight] = useState(50);
+  const [listHeight, setListHeight] = useState(15);
   const [isDragging, setIsDragging] = useState(false);
   const startY = useRef(0);
   const startHeight = useRef(0);

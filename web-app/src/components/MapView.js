@@ -138,7 +138,6 @@ function MapView({ onLogout, onOpenSettings, onOpenCollab }) {
     locationManager
       .requestLocation()
       .then((loc) => {
-        console.log(loc);
         setUserLocation(loc);
         // Only override the center if we didn't already restore a saved value.
         if (!initialStoredView.current?.center) {

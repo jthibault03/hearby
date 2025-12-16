@@ -90,7 +90,7 @@ const AIFilterPanel = ({ listeners, onClose, onTrackSelect }) => {
     <div className="ai-filter-overlay">
       <div className="ai-filter-panel">
         <div className="ai-filter-header">
-          <h2>AI Filter</h2>
+          <h2>Filter</h2>
           <button className="close-btn" onClick={onClose}>
             ✕
           </button>
@@ -113,12 +113,12 @@ const AIFilterPanel = ({ listeners, onClose, onTrackSelect }) => {
 
         {selectedGenre && (
           <>
-            <div className="sentiment-controls">
+            {/* <div className="sentiment-controls">
               <span className="sentiment-label">Sort by sentiment:</span>
               <button className="sentiment-btn" onClick={cycleSentimentSort}>
                 {getSentimentIcon()}
               </button>
-            </div>
+            </div> */}
 
             <div className="filtered-listeners">
               {filteredListeners.length === 0 ? (
