@@ -4,6 +4,7 @@
 
 Our project consists only of a frontend application, and does not need any environment variables to fully function.
 
+
 ## Prerequisites
 
 - Node.js 14.0 or later
@@ -33,6 +34,20 @@ npm start
 ```
 
 The app will open at `http://localhost:3000`
+
+### (Note)
+
+Our mock data file is included in our github repository. To generate a new dataset, you need to make a `.env` file in the `web-app` directory with the following Spotify Developer account credential information:
+```
+SPOTIFY_CLIENT_ID= ...
+SPOTIFY_CLIENT_SECRET= ...
+```
+then run:
+```
+npm run generate:songs
+npm run enrich:songs
+```
+The first command gets mock data from this kaggle dataset: https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset?resource=download, the second one uses Spotify api to enrich data with more information. 
 
 
 ### Future Enhancements
