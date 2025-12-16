@@ -35,9 +35,9 @@ npm start
 
 The app will open at `http://localhost:3000`
 
-### (Note)
+### Note
 
-Our mock data file is included in our github repository. To generate a new dataset, you need to make a `.env` file in the `web-app` directory with the following Spotify Developer account credential information:
+This is a note on the mock dataset included in the github repository. For demo testing, this note can be ignored. If you wish to generate a new dataset (e.g. different number of songs, certain popularity only, etc), you need to make a `.env` file in the `web-app` directory with the following Spotify Developer account credential information:
 ```
 SPOTIFY_CLIENT_ID= ...
 SPOTIFY_CLIENT_SECRET= ...
@@ -47,7 +47,7 @@ then run:
 npm run generate:songs
 npm run enrich:songs
 ```
-The first command gets mock data from this kaggle dataset: https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset?resource=download, the second one uses Spotify api to enrich data with more information. 
+The first command gets mock data from this kaggle dataset: https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset?resource=download, the second one uses Spotify api to enrich data with more information. The code for this is located in the `scripts` directory in case you want to see/change anything.
 
 
 ### Future Enhancements
